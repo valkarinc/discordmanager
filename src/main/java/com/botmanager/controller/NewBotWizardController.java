@@ -24,18 +24,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-/**
- * Controller for the "Create New Discord Bot Project" wizard.
- * Manages the multi-step form and initiates bot project generation.
- */
 public class NewBotWizardController {
 
-    // FXML Injections for Wizard UI
+    // FXML for Wizard UI
     @FXML private AnchorPane wizardRootPane;
     @FXML private Label stepTitleLabel;
-    @FXML private StackPane wizardContentStackPane; // To hold step panes
+    @FXML private StackPane wizardContentStackPane;
 
-    // Step 1: Basic Information
     @FXML private VBox step1Pane;
     @FXML private TextField botDisplayNameField;
     @FXML private TextField projectNameField;
@@ -43,72 +38,57 @@ public class NewBotWizardController {
     @FXML private TextField botVersionField;
     @FXML private TextArea botDescriptionArea;
 
-    // Step 2: Configuration & Dependencies
     @FXML private VBox step2Pane;
     @FXML private TextField mainClassNameField;
     @FXML private ComboBox<String> botTypeComboBox;
     @FXML private ComboBox<String> javaVersionComboBox;
-    @FXML private PasswordField botTokenField; // Using PasswordField for token
+    @FXML private PasswordField botTokenField;
     @FXML private CheckBox includeDiscordTokenEnv;
     @FXML private CheckBox includePrefixEnv;
 
-    // Step 3: Installation Location
     @FXML private VBox step3Pane;
     @FXML private TextField installLocationField;
     @FXML private Button browseLocationButton;
     @FXML private Label projectPreviewPathLabel;
 
-    // Navigation Buttons
     @FXML private Button backButton;
     @FXML private Button nextButton;
     @FXML private Button finishButton;
     @FXML private Button cancelButton;
 
-    // Error Label (Common for all steps)
     @FXML private Label errorLabel;
 
-    // Internal state
     private int currentStep = 1;
     private final int totalSteps = 3;
-    private MainController mainController; // Reference to the main controller
+    private MainController mainController;
 
-    /**
-     * Called by the MainController to pass a reference to itself.
-     * This allows the wizard to call methods on the main controller (e.g., to add the new bot).
-     */
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
     }
 
     @FXML
     public void initialize() {
-        // Set default values for step 1
+
         botVersionField.setText("1.0.0");
         groupIdField.setText("com.mycompany.discordbot");
 
-        // Set default values for step 2
         mainClassNameField.setText("Main");
-        botTypeComboBox.getSelectionModel().selectFirst(); // JDA Basic
+        botTypeComboBox.getSelectionModel().selectFirst();
         javaVersionComboBox.getSelectionModel().select("17"); // Default Java Version
 
-        // Add listeners for auto-filling project name and main class based on display name
         botDisplayNameField.textProperty().addListener((obs, oldVal, newVal) -> {
             if (oldVal == null || oldVal.isEmpty() || projectNameField.getText().equalsIgnoreCase(cleanForProjectName(oldVal))) {
                 projectNameField.setText(cleanForProjectName(newVal));
             }
             if (oldVal == null || oldVal.isEmpty() || mainClassNameField.getText().equalsIgnoreCase(cleanForClassName(oldVal))) {
-                mainClassNameField.setText(cleanForClassName(newVal) + "Main"); // Suggest MyBotMain
+                mainClassNameField.setText(cleanForClassName(newVal) + "Main");
             }
         });
 
-        // Update project preview path dynamically
         installLocationField.textProperty().addListener((obs, oldVal, newVal) -> updateProjectPreviewPath());
         projectNameField.textProperty().addListener((obs, oldVal, newVal) -> updateProjectPreviewPath());
 
-        // Initial UI state setup
         updateWizardUI();
-
-        // Add input listeners for real-time validation feedback
         addValidationListeners();
     }
 
@@ -126,10 +106,6 @@ public class NewBotWizardController {
         installLocationField.textProperty().addListener((obs) -> validateCurrentStep());
     }
 
-    /**
-     * Cleans a string for use as a Maven artifactId (project name).
-     * Converts to lowercase, replaces spaces with hyphens, removes special characters.
-     */
     private String cleanForProjectName(String name) {
         if (name == null) return "";
         return name.toLowerCase()
@@ -138,10 +114,6 @@ public class NewBotWizardController {
                 .replaceAll("^-|-$", "");      // Remove leading/trailing hyphens
     }
 
-    /**
-     * Cleans a string for use as a Java class name.
-     * Removes non-alphanumeric characters, capitalizes first letter of words.
-     */
     private String cleanForClassName(String name) {
         if (name == null) return "";
         String cleaned = name.replaceAll("[^a-zA-Z0-9\\s]", "");
@@ -170,9 +142,6 @@ public class NewBotWizardController {
         }
     }
 
-    /**
-     * Updates the visibility of wizard steps and navigation buttons.
-     */
     private void updateWizardUI() {
         step1Pane.setVisible(false);
         step1Pane.setManaged(false);
@@ -204,7 +173,7 @@ public class NewBotWizardController {
                 stepTitleLabel.setText("Step 3: Installation Location");
                 break;
         }
-        validateCurrentStep(); // Validate the newly visible step
+        validateCurrentStep();
     }
 
     /**
@@ -261,17 +230,14 @@ public class NewBotWizardController {
         errorLabel.setVisible(!isValid);
         errorLabel.setManaged(!isValid);
 
-        // Disable Next/Finish button if current step is invalid
         if (currentStep < totalSteps) {
             nextButton.setDisable(!isValid);
-        } else { // On the last step, enable/disable Finish button
+        } else {
             finishButton.setDisable(!isValid);
         }
 
         return isValid;
     }
-
-    // --- Event Handlers ---
 
     @FXML
     private void handleBack(ActionEvent event) {
@@ -294,7 +260,7 @@ public class NewBotWizardController {
     @FXML
     private void handleFinish(ActionEvent event) {
         if (validateCurrentStep()) {
-            // Collect all details
+
             BotCreationDetails details = new BotCreationDetails(
                     botDisplayNameField.getText().trim(),
                     projectNameField.getText().trim(),
@@ -310,11 +276,9 @@ public class NewBotWizardController {
                     includePrefixEnv.isSelected()
             );
 
-            // Close the wizard window
             Stage stage = (Stage) wizardRootPane.getScene().getWindow();
             stage.close();
 
-            // Notify MainController to generate bot and add to list
             if (mainController != null) {
                 mainController.appendConsoleOutput("[INFO] Preparing to create bot project: " + details.getDisplayName());
                 mainController.appendConsoleOutput("[INFO] This might take a moment...");
@@ -323,26 +287,24 @@ public class NewBotWizardController {
                         new BotGenerator().generateBotProject(details);
 
                         Platform.runLater(() -> {
-                            // Create a new Bot object from the details to add to MainController's list
+
                             Bot newBot = new Bot(
-                                    UUID.randomUUID().toString(), // Generate unique ID
+                                    UUID.randomUUID().toString(),
                                     details.getDisplayName(),
                                     details.getDescription(),
                                     details.getFullProjectPath().toString(),
                                     details.getVersion(),
-                                    details.getMainClassName(), // mainFile
-                                    "INFO", // Default log level
-                                    false // Not running initially
+                                    details.getMainClassName(),
+                                    "INFO",
+                                    false
                             );
-                            newBot.setJvmArgs(""); // Default
-                            newBot.setStartupDelayMs(0); // Default
+                            newBot.setJvmArgs("");
+                            newBot.setStartupDelayMs(0);
 
-                            // If includeDiscordTokenEnv is selected, add it as an env variable to the Bot model
                             if (details.isIncludeDiscordTokenEnv()) {
                                 // Important: We DO NOT store the token directly in the Bot object here for security.
-                                // The generated project will read it from its own environment.
-                                // We just represent that it's a *configured* env var.
-                                newBot.getEnvVariables().add(new MainController.EnvVariable("DISCORD_TOKEN", "")); // Value empty or a placeholder
+
+                                newBot.getEnvVariables().add(new MainController.EnvVariable("DISCORD_TOKEN", ""));
                             }
                             if (details.isIncludePrefixEnv()) {
                                 newBot.getEnvVariables().add(new MainController.EnvVariable("BOT_PREFIX", "!"));
@@ -398,15 +360,9 @@ public class NewBotWizardController {
         }
     }
 
-
-    // --- Helper Class for Wizard Result ---
-
-    /**
-     * Stores the details collected from the New Bot Wizard.
-     */
     public static class BotCreationDetails {
         private final String displayName;
-        private final String projectName; // artifactId
+        private final String projectName;
         private final String groupId;
         private final String version;
         private final String description;
