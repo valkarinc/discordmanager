@@ -12,6 +12,6 @@ object StringFormatter {
 
     @JvmStatic
     fun getGreeting(name: String): String {
-        return "Hello, $name from Kotlin!"
+        return "Hello, $name from Bot Manager!"
     }
 }
