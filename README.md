@@ -1,6 +1,6 @@
 # Discord Bot Manager
 
-![Discord Bot Manager Screenshot](docs/screenshot.png) A powerful and intuitive desktop application built with JavaFX to streamline the management of your Discord bot projects. This manager allows you to create new bot projects from templates, import existing ones, control their lifecycle (start, stop, restart), view console output, and manage their configurations and environment variables – all from a user-friendly graphical interface.
+A powerful and intuitive desktop application built with JavaFX to streamline the management of your Discord bot projects. This manager allows you to create new bot projects from templates, import existing ones, control their lifecycle (start, stop, restart), view console output, and manage their configurations and environment variables – all from a user-friendly graphical interface.
 
 ## ✨ Features
 
