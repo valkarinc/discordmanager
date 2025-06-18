@@ -17,6 +17,10 @@
         <jackson.version>2.15.2</jackson.version>
         <materialfx.version>11.13.5</materialfx.version>
         <kotlin.version>1.9.20</kotlin.version>
+        <!-- Define the main class for the JPackage (this is for the Patcher launcher) -->
+        <launcher.main.class>com.botmanager.patcher.Patcher</launcher.main.class>
+        <!-- Define the main class for your Discord Bot Manager application (for javafx:run and shaded JAR) -->
+        <main.app.class>com.botmanager.Launcher</main.app.class>
     </properties>
 
     <dependencies>
@@ -34,7 +38,7 @@
             <version>${javafx.version}</version>
         </dependency>
 
-        <!-- Jackson for JSON parsing -->
+        <!-- Jackson for JSON parsing (needed by Patcher and potentially other parts of your app) -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
@@ -66,6 +70,7 @@
 
     <build>
         <plugins>
+            <!-- Kotlin Maven Plugin - Compiles your Kotlin source files -->
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
@@ -96,6 +101,7 @@
                 </configuration>
             </plugin>
 
+            <!-- Maven Compiler Plugin - Compiles your Java source files -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -106,16 +112,77 @@
                 </configuration>
             </plugin>
 
+            <!-- Maven JAR Plugin - Explicitly defined to ensure the main artifact is created -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.3.0</version> <!-- Use a stable version -->
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <!-- Important: Ensure this mainClass matches your application's entry point if you run this JAR directly -->
+                            <!-- However, for the shaded JAR, the shade plugin's manifest transformer will override this. -->
+                            <mainClass>${main.app.class}</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>default-jar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- JavaFX Maven Plugin - Handles running the main app and building the native launcher -->
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
-                <version>0.0.8</version>
+                <version>0.0.7</version>
                 <configuration>
-                    <mainClass>com.botmanager.Launcher</mainClass>
+                    <!-- Default configuration for 'javafx:run' goal - points to your main application -->
+                    <mainClass>${main.app.class}</mainClass>
                     <runtimePathOption>CLASSPATH</runtimePathOption>
                 </configuration>
+                <executions>
+                    <!-- Execution for building the native launcher (Patcher) using jpackage -->
+                    <execution>
+                        <id>jpackage-launcher</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jlink</goal>
+                            <goal>jpackage</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Main class for the native *launcher* (Patcher) -->
+                            <mainClass>${launcher.main.class}</mainClass>
+                            <jlinkExecutable>true</jlinkExecutable>
+                            <noManPages>true</noManPages>
+                            <noHeaderFiles>true</noHeaderFiles>
+                            <stripDebug>true</stripDebug>
+                            <launcher>DiscordBotManagerUpdater</launcher>
+                            <jpackage>
+                                <imageName>DiscordBotManagerUpdater</imageName>
+                                <vendor>Valkarinc</vendor>
+                                <icon>src/main/resources/icons/launcher_icon.icns</icon>
+                                <installerType>dmg</installerType>
+                                <appName>Discord Bot Manager Updater</appName>
+                                <appVersion>${project.version}</appVersion>
+                                <copyright>Copyright 2023 Valkarinc</copyright>
+                                <vendor>Valkarinc</vendor>
+                                <description>Launcher and Updater for Discord Bot Manager</description>
+                            </jpackage>
+                        </configuration>
+                    </execution>
+                    <!-- You can add other javafx-maven-plugin executions here if needed -->
+                </executions>
             </plugin>
 
+            <!-- Maven Assembly Plugin - REMOVED TO AVOID CONFLICTS WITH SHADE PLUGIN -->
+            <!--
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
@@ -140,7 +207,9 @@
                     </execution>
                 </executions>
             </plugin>
+            -->
 
+            <!-- Maven Shade Plugin - Recommended for creating a single, runnable fat JAR of your main app. -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -154,9 +223,10 @@
                         <configuration>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.botmanager.Launcher</mainClass>
+                                    <mainClass>${main.app.class}</mainClass>
                                 </transformer>
                             </transformers>
+                            <finalName>${project.artifactId}-${project.version}</finalName>
                         </configuration>
                     </execution>
                 </executions>
@@ -164,4 +234,3 @@
         </plugins>
     </build>
 </project>
-    
