@@ -294,7 +294,7 @@
     -fx-background-color: transparent;
 }
 .scroll-pane-style .viewport {
-    -fx-background-color: transparent; /* VERY IMPORTANT: Ensures ScrollPane content background is dark */
+    -fx-background-color: transparent;
 }
 .scroll-pane-style .scroll-bar:vertical .thumb,
 .scroll-pane-style .scroll-bar:horizontal .thumb {
