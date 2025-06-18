@@ -45,7 +45,7 @@ Before you begin, ensure you have the following installed:
 
 1.  **Clone the Repository:**
     ```bash
-    git clone [https://github.com/your-username/DiscordManager.git](https://github.com/your-username/DiscordManager.git) # Replace with your repo URL
+    git clone [https://github.com/valkarinc/discordmanager.git](https://github.com/valkarinc/discordmanager.git) # Replace with your repo URL
     cd DiscordManager
     ```
 
