@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
+
+<AnchorPane fx:id="wizardRootPane" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.botmanager.controller.NewBotWizardController">
+    <VBox alignment="TOP_CENTER" spacing="20.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+        </padding>
+
+        <VBox alignment="CENTER" spacing="5.0">
+            <Label styleClass="wizard-title" text="Create New Discord Bot Project Wizard">
+                <font>
+                    <Font name="System Bold" size="24.0" />
+                </font>
+            </Label>
+            <Label fx:id="stepTitleLabel" styleClass="wizard-subtitle" text="Step 1: Bot Basic Information" />
+            <Separator prefWidth="200.0" />
+        </VBox>
+
+        <StackPane VBox.vgrow="ALWAYS">
+
+            <VBox fx:id="step1Pane" spacing="15.0" styleClass="wizard-step-pane">
+                <GridPane hgap="15.0" vgap="10.0">
+                    <columnConstraints>
+                        <ColumnConstraints minWidth="150.0" prefWidth="180.0" />
+                        <ColumnConstraints hgrow="ALWAYS" />
+                    </columnConstraints>
+
+                    <Label text="Bot Display Name:" GridPane.columnIndex="0" GridPane.rowIndex="0" styleClass="form-label" />
+                    <TextField fx:id="botDisplayNameField" GridPane.columnIndex="1" GridPane.rowIndex="0" promptText="e.g., My Awesome Bot" styleClass="text-field-style" />
+
+                    <Label text="Project Name (ArtifactId):" GridPane.columnIndex="0" GridPane.rowIndex="1" styleClass="form-label" />
+                    <TextField fx:id="projectNameField" GridPane.columnIndex="1" GridPane.rowIndex="1" promptText="e.g., my-awesome-bot" styleClass="text-field-style" />
+
+                    <Label text="Group ID (Package):" GridPane.columnIndex="0" GridPane.rowIndex="2" styleClass="form-label" />
+                    <TextField fx:id="groupIdField" GridPane.columnIndex="1" GridPane.rowIndex="2" promptText="e.g., com.yourcompany.bots" styleClass="text-field-style" />
+
+                    <Label text="Bot Version:" GridPane.columnIndex="0" GridPane.rowIndex="3" styleClass="form-label" />
+                    <TextField fx:id="botVersionField" GridPane.columnIndex="1" GridPane.rowIndex="3" text="1.0.0" styleClass="text-field-style" />
+
+                    <Label text="Bot Description:" GridPane.columnIndex="0" GridPane.rowIndex="4" styleClass="form-label" />
+                    <TextArea fx:id="botDescriptionArea" GridPane.columnIndex="1" GridPane.rowIndex="4" prefRowCount="3" promptText="A brief description of what your bot does." styleClass="text-area-style" />
+                </GridPane>
+            </VBox>
+
+            <VBox fx:id="step2Pane" spacing="15.0" styleClass="wizard-step-pane" visible="false" managed="false">
+                <GridPane hgap="15.0" vgap="10.0">
+                    <columnConstraints>
+                        <ColumnConstraints minWidth="180.0" prefWidth="200.0" />
+                        <ColumnConstraints hgrow="ALWAYS" />
+                    </columnConstraints>
+
+                    <Label text="Main Class Name:" GridPane.columnIndex="0" GridPane.rowIndex="0" styleClass="form-label" />
+                    <TextField fx:id="mainClassNameField" GridPane.columnIndex="1" GridPane.rowIndex="0" promptText="e.g., MyBotMain" styleClass="text-field-style" />
+
+                    <Label text="Bot Type/Framework:" GridPane.columnIndex="0" GridPane.rowIndex="1" styleClass="form-label" />
+                    <ComboBox fx:id="botTypeComboBox" GridPane.columnIndex="1" GridPane.rowIndex="1" prefWidth="250.0" styleClass="combo-box-style">
+                        <items>
+                            <FXCollections fx:factory="observableArrayList">
+                                <String fx:value="JDA (Java Discord API) Basic" />
+                                <String fx:value="Discord4J (Reactive Java Discord API) Basic" />
+                                <String fx:value="Custom (Advanced)" />
+                            </FXCollections>
+                        </items>
+                    </ComboBox>
+
+                    <Label text="Java Version (Source/Target):" GridPane.columnIndex="0" GridPane.rowIndex="2" styleClass="form-label" />
+                    <ComboBox fx:id="javaVersionComboBox" GridPane.columnIndex="1" GridPane.rowIndex="2" prefWidth="100.0" styleClass="combo-box-style">
+                        <items>
+                            <FXCollections fx:factory="observableArrayList">
+                                <String fx:value="11" />
+                                <String fx:value="17" />
+                                <String fx:value="21" />
+                            </FXCollections>
+                        </items>
+                    </ComboBox>
+
+                    <Label text="Initial Bot Token (Optional):" GridPane.columnIndex="0" GridPane.rowIndex="3" styleClass="form-label" />
+                    <PasswordField fx:id="botTokenField" GridPane.columnIndex="1" GridPane.rowIndex="3" promptText="Paste your Discord bot token here (optional)" styleClass="text-field-style" />
+
+                    <Label text="Recommended Initial Env Vars:" GridPane.columnIndex="0" GridPane.rowIndex="4" styleClass="form-label" />
+                    <VBox GridPane.columnIndex="1" GridPane.rowIndex="4" spacing="5">
+                        <CheckBox fx:id="includeDiscordTokenEnv" text="DISCORD_TOKEN" selected="true" styleClass="checkbox-style"/>
+                        <CheckBox fx:id="includePrefixEnv" text="BOT_PREFIX (!)" selected="true" styleClass="checkbox-style"/>
+                        <Label styleClass="info-label" text="These will be added to your bot's config, not hardcoded." />
+                    </VBox>
+                </GridPane>
+            </VBox>
+
+            <VBox fx:id="step3Pane" spacing="15.0" styleClass="wizard-step-pane" visible="false" managed="false">
+                <Label styleClass="section-heading" text="Choose Project Installation Location" />
+                <HBox spacing="10.0">
+                    <TextField fx:id="installLocationField" HBox.hgrow="ALWAYS" editable="false" promptText="Select a directory to save your new bot project" styleClass="text-field-style-readonly" />
+                    <Button fx:id="browseLocationButton" mnemonicParsing="false" onAction="#handleBrowseLocation" text="Browse..." styleClass="action-button-secondary" />
+                </HBox>
+                <Label styleClass="info-label" text="A new folder with the project name will be created inside the selected location." />
+
+                <Label styleClass="section-heading" text="Project Preview Path:" />
+                <Label fx:id="projectPreviewPathLabel" styleClass="code-label" wrapText="true" text="[Please select an install location]" />
+            </VBox>
+
+            <Label fx:id="errorLabel" styleClass="error-message" visible="false" managed="false" wrapText="true" StackPane.alignment="BOTTOM_CENTER">
+                <VBox.margin>
+                    <Insets top="10" />
+                </VBox.margin>
+            </Label>
+        </StackPane>
+
+        <HBox alignment="CENTER_RIGHT" spacing="10.0">
+            <Button fx:id="backButton" mnemonicParsing="false" onAction="#handleBack" text="Back" disable="true" styleClass="action-button-secondary" />
+            <Button fx:id="nextButton" mnemonicParsing="false" onAction="#handleNext" text="Next" styleClass="action-button-primary" />
+            <Button fx:id="finishButton" mnemonicParsing="false" onAction="#handleFinish" text="Finish" visible="false" managed="false" styleClass="action-button-success" />
+            <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#handleCancel" text="Cancel" styleClass="action-button-danger" />
+        </HBox>
+    </VBox>
+</AnchorPane>
