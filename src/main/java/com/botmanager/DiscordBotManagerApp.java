@@ -12,7 +12,7 @@ import java.io.InputStream;
 /**
  * Main JavaFX Application class for Discord Bot Manager
  *
- * @author Your Name
+ * @author valkarinc
  * @version 1.0.0
  */
 public class DiscordBotManagerApp extends Application {
@@ -24,25 +24,22 @@ public class DiscordBotManagerApp extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-            // Load FXML
+
             FXMLLoader fxmlLoader = new FXMLLoader(
                     getClass().getResource("/fxml/main.fxml")
             );
 
             Scene scene = new Scene(fxmlLoader.load(), MIN_WIDTH, MIN_HEIGHT);
 
-            // Load CSS styles
             scene.getStylesheets().add(
                     getClass().getResource("/css/styles.css").toExternalForm()
             );
 
-            // Configure stage
             primaryStage.setTitle(APP_TITLE);
             primaryStage.setScene(scene);
             primaryStage.setMinWidth(MIN_WIDTH);
             primaryStage.setMinHeight(MIN_HEIGHT);
 
-            // Set application icon (optional)
             try (InputStream iconStream = getClass().getResourceAsStream("/images/bot-icon.png")) {
                 if (iconStream != null) {
                     primaryStage.getIcons().add(new Image(iconStream));
@@ -51,7 +48,6 @@ public class DiscordBotManagerApp extends Application {
                 System.out.println("Could not load application icon: " + e.getMessage());
             }
 
-            // Handle application close
             primaryStage.setOnCloseRequest(event -> {
                 // TODO: Stop all running bots before closing
                 System.out.println("Application closing...");
@@ -66,13 +62,8 @@ public class DiscordBotManagerApp extends Application {
         }
     }
 
-    /**
-     * Application entry point
-     */
-    public static void main(String[] args) {
-        // Remove or comment out this line:
-        // System.setProperty("javafx.preloader", "com.sun.javafx.application.LauncherImpl");
 
+    public static void main(String[] args) {
         launch(args);
     }
 }

@@ -30,6 +30,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Main Controller for the Discord Bot Manager.
@@ -532,20 +533,45 @@ public class MainController implements Initializable {
     @FXML
     private void handleStopBot() {
         if (currentlySelectedBot != null) {
+            if (!currentlySelectedBot.isRunning()) {
+                showAlert("Bot Not Running", currentlySelectedBot.getName() + " is not currently running.");
+                return;
+            }
+
             System.out.println("Attempting to stop bot: " + currentlySelectedBot.getName());
             consoleOutputArea.appendText("[INFO] Stopping " + currentlySelectedBot.getName() + "...\n");
-            // TODO: Implement actual bot shutdown command execution
-            // Simulate shutdown success/failure
-            boolean stopped = Math.random() > 0.2; // Simulate 80% success rate
-            if (stopped) {
-                currentlySelectedBot.setRunning(false);
-                startBotButton.setDisable(false);
-                stopBotButton.setDisable(true);
-                consoleOutputArea.appendText("[INFO] " + currentlySelectedBot.getName() + " stopped.\n");
-                statusLabel.setText("Bot stopped: " + currentlySelectedBot.getName());
+
+            Process botProcess = currentlySelectedBot.getBotProcess();
+            if (botProcess != null) {
+                try {
+                    botProcess.destroy();
+
+                    boolean exited = botProcess.waitFor(5, TimeUnit.SECONDS);
+
+                    if (exited) {
+                        consoleOutputArea.appendText("[INFO] " + currentlySelectedBot.getName() + " stopped successfully.\n");
+                    } else {
+                        botProcess.destroyForcibly();
+                        consoleOutputArea.appendText("[WARN] " + currentlySelectedBot.getName() + " did not respond; forced to stop.\n");
+                    }
+
+                    currentlySelectedBot.setRunning(false);
+                    currentlySelectedBot.setBotProcess(null);
+                    statusLabel.setText("Bot stopped: " + currentlySelectedBot.getName());
+
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    showAlert("Error Stopping Bot", "Stop operation interrupted for " + currentlySelectedBot.getName() + ": " + e.getMessage());
+                    statusLabel.setText("Failed to stop bot: " + currentlySelectedBot.getName());
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    showAlert("Error Stopping Bot", "Could not stop bot: " + e.getMessage());
+                    statusLabel.setText("Failed to stop bot: " + currentlySelectedBot.getName());
+                    e.printStackTrace();
+                }
             } else {
-                consoleOutputArea.appendText("[ERROR] Failed to stop " + currentlySelectedBot.getName() + ".\n");
-                statusLabel.setText("Failed to stop bot: " + currentlySelectedBot.getName());
+                consoleOutputArea.appendText("[WARN] No active process reference found for " + currentlySelectedBot.getName() + ". Assuming it's already stopped.\n");
+                currentlySelectedBot.setRunning(false);
             }
 
             long runningCount = masterBotList.stream().filter(Bot::isRunning).count();
@@ -554,7 +580,7 @@ public class MainController implements Initializable {
             if (autoScrollCheckBox.isSelected()) {
                 consoleOutputArea.setScrollTop(Double.MAX_VALUE);
             }
-            updateUIState(currentlySelectedBot); // Update button state
+            updateUIState(currentlySelectedBot);
         } else {
             showWarningAlert("No Bot Selected", "Please select a bot from the list to stop.");
         }
