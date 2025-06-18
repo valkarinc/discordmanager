@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.botmanager.controller.MainController">
+
+    <!-- Top Menu Bar -->
+    <top>
+        <MenuBar>
+            <menus>
+                <Menu mnemonicParsing="false" text="File">
+                    <items>
+                        <MenuItem fx:id="importBotMenuItem" mnemonicParsing="false" onAction="#handleImportBot" text="Import Bot Project..." />
+                        <SeparatorMenuItem />
+                        <MenuItem fx:id="exitMenuItem" mnemonicParsing="false" onAction="#handleExit" text="Exit" />
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="View">
+                    <items>
+                        <MenuItem fx:id="refreshMenuItem" mnemonicParsing="false" onAction="#handleRefresh" text="Refresh" />
+                        <CheckMenuItem fx:id="darkModeMenuItem" mnemonicParsing="false" onAction="#handleToggleDarkMode" text="Dark Mode" />
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Help">
+                    <items>
+                        <MenuItem fx:id="aboutMenuItem" mnemonicParsing="false" onAction="#handleAbout" text="About" />
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+    </top>
+
+    <!-- Main Content Area -->
+    <center>
+        <SplitPane dividerPositions="0.25" prefHeight="600.0" prefWidth="900.0">
+
+            <!-- Left Sidebar - Bot List -->
+            <AnchorPane minWidth="200.0" prefWidth="250.0">
+                <VBox spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                    </padding>
+
+                    <!-- Sidebar Header -->
+                    <HBox alignment="CENTER_LEFT" spacing="10.0">
+                        <Label styleClass="sidebar-title" text="Imported Bots">
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
+                        </Label>
+                        <Button fx:id="addBotButton" mnemonicParsing="false" onAction="#handleImportBot" styleClass="icon-button" text="+" />
+                    </HBox>
+
+                    <!-- Bot List -->
+                    <ListView fx:id="botListView" prefHeight="400.0" styleClass="bot-list" />
+
+                    <!-- Quick Actions -->
+                    <VBox spacing="5.0">
+                        <Label styleClass="section-title" text="Quick Actions">
+                            <font>
+                                <Font size="12.0" />
+                            </font>
+                        </Label>
+                        <Button fx:id="startAllButton" maxWidth="Infinity" mnemonicParsing="false" onAction="#handleStartAll" text="Start All Bots" />
+                        <Button fx:id="stopAllButton" maxWidth="Infinity" mnemonicParsing="false" onAction="#handleStopAll" text="Stop All Bots" />
+                    </VBox>
+                </VBox>
+            </AnchorPane>
+
+            <!-- Right Panel - Bot Details and Control -->
+            <AnchorPane minWidth="600.0">
+                <VBox spacing="15.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <padding>
+                        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                    </padding>
+
+                    <!-- Bot Info Header -->
+                    <HBox alignment="CENTER_LEFT" spacing="15.0">
+                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                            <Label fx:id="botNameLabel" styleClass="bot-name" text="Select a bot to view details">
+                                <font>
+                                    <Font name="System Bold" size="18.0" />
+                                </font>
+                            </Label>
+                            <Label fx:id="botDescriptionLabel" styleClass="bot-description" text="" />
+                            <Label fx:id="botPathLabel" styleClass="bot-path" text="" />
+                        </VBox>
+
+                        <!-- Control Buttons -->
+                        <VBox spacing="8.0">
+                            <Button fx:id="startBotButton" disable="true" minWidth="80.0" mnemonicParsing="false" onAction="#handleStartBot" styleClass="start-button" text="Start" />
+                            <Button fx:id="stopBotButton" disable="true" minWidth="80.0" mnemonicParsing="false" onAction="#handleStopBot" styleClass="stop-button" text="Stop" />
+                            <Button fx:id="restartBotButton" disable="true" minWidth="80.0" mnemonicParsing="false" onAction="#handleRestartBot" text="Restart" />
+                        </VBox>
+                    </HBox>
+
+                    <Separator />
+
+                    <!-- Bot Configuration Tabs -->
+                    <TabPane fx:id="configTabPane" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+
+                        <!-- Console Output Tab -->
+                        <Tab text="Console Output">
+                            <VBox spacing="5.0">
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <Label text="Bot Output:" />
+                                    <Button fx:id="clearLogButton" mnemonicParsing="false" onAction="#handleClearLog" text="Clear" />
+                                    <CheckBox fx:id="autoScrollCheckBox" selected="true" text="Auto-scroll" />
+                                </HBox>
+                                <TextArea fx:id="consoleOutputArea" editable="false" prefHeight="300.0" styleClass="console-output" wrapText="true" VBox.vgrow="ALWAYS" />
+                            </VBox>
+                        </Tab>
+
+                        <!-- Configuration Tab -->
+                        <Tab text="Configuration">
+                            <ScrollPane fitToWidth="true">
+                                <VBox spacing="10.0">
+                                    <padding>
+                                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                    </padding>
+
+                                    <Label styleClass="section-title" text="Bot Information" />
+                                    <GridPane hgap="10.0" vgap="8.0">
+                                        <columnConstraints>
+                                            <ColumnConstraints minWidth="100.0" prefWidth="150.0" />
+                                            <ColumnConstraints hgrow="ALWAYS" />
+                                        </columnConstraints>
+
+                                        <Label text="Name:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                        <TextField fx:id="configBotNameField" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                                        <Label text="Version:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                        <TextField fx:id="configBotVersionField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                                        <Label text="Main File:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                                        <TextField fx:id="configMainFileField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                    </GridPane>
+
+                                    <Separator />
+
+                                    <Label styleClass="section-title" text="Environment Variables" />
+                                    <TableView fx:id="envVarsTable" prefHeight="200.0">
+                                        <columns>
+                                            <TableColumn fx:id="envKeyColumn" prefWidth="200.0" text="Key" />
+                                            <TableColumn fx:id="envValueColumn" prefWidth="300.0" text="Value" />
+                                        </columns>
+                                    </TableView>
+
+                                    <HBox spacing="10.0">
+                                        <Button fx:id="addEnvVarButton" mnemonicParsing="false" onAction="#handleAddEnvVar" text="Add Variable" />
+                                        <Button fx:id="removeEnvVarButton" mnemonicParsing="false" onAction="#handleRemoveEnvVar" text="Remove Selected" />
+                                        <Button fx:id="saveConfigButton" mnemonicParsing="false" onAction="#handleSaveConfig" styleClass="save-button" text="Save Configuration" />
+                                    </HBox>
+                                </VBox>
+                            </ScrollPane>
+                        </Tab>
+
+                    </TabPane>
+                </VBox>
+            </AnchorPane>
+
+        </SplitPane>
+    </center>
+
+    <!-- Status Bar -->
+    <bottom>
+        <HBox alignment="CENTER_LEFT" spacing="15.0" styleClass="status-bar">
+            <padding>
+                <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
+            </padding>
+            <Label fx:id="statusLabel" text="Ready" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Label fx:id="runningBotsLabel" text="Running Bots: 0" />
+        </HBox>
+    </bottom>
+
+</BorderPane>
