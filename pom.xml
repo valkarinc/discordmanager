@@ -16,6 +16,7 @@
         <javafx.version>19.0.2.1</javafx.version>
         <jackson.version>2.15.2</jackson.version>
         <materialfx.version>11.13.5</materialfx.version>
+        <kotlin.version>1.9.20</kotlin.version>
     </properties>
 
     <dependencies>
@@ -40,6 +41,13 @@
             <version>${jackson.version}</version>
         </dependency>
 
+        <!-- Kotlin for JVM -->
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib-jdk8</artifactId>
+            <version>${kotlin.version}</version>
+        </dependency>
+
         <!-- MaterialFX for modern UI (optional) -->
         <dependency>
             <groupId>io.github.palexdev</groupId>
@@ -58,7 +66,36 @@
 
     <build>
         <plugins>
-            <!-- Maven Compiler Plugin -->
+            <plugin>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-maven-plugin</artifactId>
+                <version>${kotlin.version}</version>
+                <executions>
+                    <execution>
+                        <id>compile</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirs>
+                                <sourceDir>${project.basedir}/src/main/java</sourceDir>
+                            </sourceDirs>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>test-compile</id>
+                        <phase>process-test-sources</phase>
+                        <goals>
+                            <goal>test-compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <jvmTarget>17</jvmTarget>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -69,13 +106,11 @@
                 </configuration>
             </plugin>
 
-            <!-- JavaFX Maven Plugin -->
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
                 <configuration>
-                    <!-- Use the new Launcher class -->
                     <mainClass>com.botmanager.Launcher</mainClass>
                     <runtimePathOption>CLASSPATH</runtimePathOption>
                 </configuration>
@@ -106,7 +141,6 @@
                 </executions>
             </plugin>
 
-            <!-- Maven Shade Plugin for creating fat JAR -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -120,7 +154,6 @@
                         <configuration>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <!-- Use the new Launcher class here as well -->
                                     <mainClass>com.botmanager.Launcher</mainClass>
                                 </transformer>
                             </transformers>

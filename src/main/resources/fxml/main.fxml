@@ -127,6 +127,22 @@
                                         <Button fx:id="clearLogButton" mnemonicParsing="false" onAction="#handleClearLog" styleClass="action-button-secondary" text="Clear Log">
                                         </Button>
                                     </HBox>
+                                    <!-- Add this HBox for command input -->
+                                    <Separator fx:id="commandInputSeparator" prefWidth="200.0">
+                                        <VBox.margin>
+                                            <Insets top="10.0" bottom="5.0" />
+                                        </VBox.margin>
+                                    </Separator>
+                                    <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                        <padding>
+                                            <Insets bottom="5.0" />
+                                        </padding>
+                                        <Label text="Send Command to Bot:" styleClass="form-label"/>
+                                        <TextField fx:id="botCommandInput" HBox.hgrow="ALWAYS" promptText="e.g., !ping" styleClass="text-field-style"/>
+                                        <Button fx:id="sendCommandButton" text="Send" onAction="#handleSendCommand" styleClass="action-button-primary"/>
+                                    </HBox>
+
+                                    <!-- Existing TextArea for console output -->
                                     <TextArea fx:id="consoleOutputArea" editable="false" prefHeight="300.0" styleClass="console-output-area" wrapText="true" VBox.vgrow="ALWAYS" />
                                 </VBox>
                             </content>

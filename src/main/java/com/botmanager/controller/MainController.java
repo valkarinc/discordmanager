@@ -1,5 +1,7 @@
 package com.botmanager.controller;
 
+import com.botmanager.util.CommandGenerator;
+import com.botmanager.util.StringFormatter;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -25,6 +27,7 @@ import java.io.*;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.UUID; // To generate unique IDs for bots (placeholder)
 import java.util.function.Predicate;
@@ -73,6 +76,11 @@ public class MainController implements Initializable {
     @FXML private Button restartBotButton;
     @FXML private Button editBotButton;   // New button
     @FXML private Button removeBotButton; // New button
+
+    @FXML private TextField botCommandInput;
+    @FXML private Button sendCommandButton;
+    @FXML private Separator commandInputSeparator;
+
 
     // Tab Pane
     @FXML private TabPane botDetailsTabPane; // Renamed from configTabPane
@@ -314,33 +322,60 @@ public class MainController implements Initializable {
     /**
      * Updates the UI state (enable/disable controls) based on whether a bot is selected.
      */
+    // In MainController.java, modify updateUIState:
     private void updateUIState(Bot selectedBot) {
         boolean isBotSelected = (selectedBot != null);
+        boolean isBotRunningAndProcessAvailable = isBotSelected && selectedBot.isRunning() && selectedBot.getBotProcess() != null && selectedBot.getBotProcess().isAlive();
 
         // Control Buttons
-        startBotButton.setDisable(!isBotSelected || selectedBot.isRunning());
-        stopBotButton.setDisable(!isBotSelected || !selectedBot.isRunning());
-        restartBotButton.setDisable(!isBotSelected);
+        startBotButton.setDisable(!isBotSelected || (selectedBot.isRunning())); // Disable if not selected or already running
+        stopBotButton.setDisable(!isBotRunningAndProcessAvailable); // Disable if not selected or not running
+        restartBotButton.setDisable(!isBotSelected); // Can always attempt restart if selected
         editBotButton.setDisable(!isBotSelected);
         removeBotButton.setDisable(!isBotSelected);
 
-        // Configuration/Settings fields (editable only when bot selected and not running)
-        boolean enableConfigEditing = isBotSelected && !selectedBot.isRunning(); // Or allow editing and require save
+        // Configuration/Settings fields
+        boolean enableConfigEditing = isBotSelected; // Allow editing if a bot is selected
         configBotNameField.setEditable(enableConfigEditing);
         configBotVersionField.setEditable(enableConfigEditing);
         configMainFileField.setEditable(enableConfigEditing);
+        configProjectPathField.setEditable(false); // Project path should generally not be edited directly after creation/import
         configDescriptionArea.setEditable(enableConfigEditing);
         jvmArgsField.setEditable(enableConfigEditing);
         startupDelayField.setEditable(enableConfigEditing);
-        envVarsTable.setEditable(enableConfigEditing); // Allow adding/removing always, but editing only when not running
+        envVarsTable.setEditable(enableConfigEditing);
         addEnvVarButton.setDisable(!isBotSelected);
-        removeEnvVarButton.setDisable(!isBotSelected);
+        removeEnvVarButton.setDisable(!isBotSelected || envVarsTable.getSelectionModel().isEmpty());
         saveConfigButton.setDisable(!isBotSelected);
 
-        // TabPane visibility (might be controlled by selected bot)
-        // For now, always visible, but tabs can be disabled or hidden based on context
-        botDetailsTabPane.getSelectionModel().selectFirst(); // Default to console tab
+        // New Command Input UI
+        if (botCommandInput != null) {
+            botCommandInput.setDisable(!isBotRunningAndProcessAvailable);
+        }
+        if (sendCommandButton != null) {
+            sendCommandButton.setDisable(!isBotRunningAndProcessAvailable);
+        }
+        if (commandInputSeparator != null) { // Show/hide separator with controls
+            commandInputSeparator.setVisible(isBotSelected);
+            commandInputSeparator.setManaged(isBotSelected);
+        }
+
+
+        // TabPane
+        if (isBotSelected) {
+            botDetailsTabPane.setDisable(false);
+            if (botDetailsTabPane.getSelectionModel().getSelectedItem() == null) {
+                botDetailsTabPane.getSelectionModel().selectFirst(); // Default to console tab
+            }
+        } else {
+            botDetailsTabPane.setDisable(true);
+            if (commandInputSeparator != null) { // Also hide separator if no bot selected
+                commandInputSeparator.setVisible(false);
+                commandInputSeparator.setManaged(false);
+            }
+        }
     }
+
 
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -465,44 +500,43 @@ public class MainController implements Initializable {
             consoleOutputArea.appendText("[INFO] Starting " + currentlySelectedBot.getName() + "...\n");
 
             try {
-                // 1. Determine the path to the bot's executable JAR file.
-                //    Assumes Maven builds to 'target/' and JAR is named 'BotName-1.0-SNAPSHOT.jar'.
-                //    YOU MIGHT NEED TO ADJUST THE JAR NAME IF YOUR BOT'S BUILD IS DIFFERENT.
-                Path botJarPath = Paths.get(currentlySelectedBot.getProjectPath(), "target",
-                        currentlySelectedBot.getName() + "-1.0-SNAPSHOT.jar");
+                // 1. Generate the command using CommandGenerator
+                List<String> commandParts = CommandGenerator.generateJavaJarStartCommand(currentlySelectedBot);
 
-                // Check if the JAR file actually exists
-                if (!botJarPath.toFile().exists()) {
-                    showAlert("JAR Not Found", "Bot JAR file not found at: " + botJarPath +
-                            "\nPlease ensure the bot project is built (e.g., run 'mvn clean install' in its folder).");
-                    currentlySelectedBot.setRunning(false); // Ensure status is not running
-                    botListView.refresh();
+                if (commandParts == null) {
+                    Path expectedJarPath = CommandGenerator.getExpectedJarPath(currentlySelectedBot);
+                    String expectedPathMessage = (expectedJarPath != null) ?
+                            "Expected at: " + expectedJarPath.toString() :
+                            "Could not determine expected JAR path (check bot name and project path).";
+
+                    showAlert("JAR Not Found or Command Generation Failed",
+                            "Bot JAR file not found or command could not be generated for '" + currentlySelectedBot.getName() + "'.\n" +
+                                    expectedPathMessage +
+                                    "\nPlease ensure the bot project is built (e.g., 'mvn clean install') and the JAR name/location are correct according to conventions.");
+
+                    currentlySelectedBot.setRunning(false);
                     updateUIState(currentlySelectedBot);
                     return;
                 }
 
-                // 2. Create a ProcessBuilder to run the Java command.
-                ProcessBuilder processBuilder = new ProcessBuilder("java", "-jar", botJarPath.toString());
-                // Set the working directory for the bot process to its project folder
+                // 2. Create a ProcessBuilder with the generated command.
+                ProcessBuilder processBuilder = new ProcessBuilder(commandParts);
                 processBuilder.directory(new File(currentlySelectedBot.getProjectPath()));
-                // Redirect error stream to output stream (optional, but often helpful)
                 processBuilder.redirectErrorStream(true);
 
                 // 3. Start the process.
                 Process process = processBuilder.start();
 
                 // 4. Store the Process object in the Bot object.
-                currentlySelectedBot.setBotProcess(process); // You need to add this method to your Bot class
+                currentlySelectedBot.setBotProcess(process);
                 currentlySelectedBot.setRunning(true);
 
                 // 5. Read output from the bot process in a separate thread.
-                //    This prevents the UI from freezing.
                 new Thread(() -> {
                     try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                         String line;
                         while ((line = reader.readLine()) != null) {
-                            final String outputLine = line; // Need final for lambda
-                            // Update UI on JavaFX Application Thread
+                            final String outputLine = line;
                             Platform.runLater(() -> consoleOutputArea.appendText("[BOT] " + currentlySelectedBot.getName() + ": " + outputLine + "\n"));
                         }
                     } catch (IOException e) {
@@ -510,24 +544,30 @@ public class MainController implements Initializable {
                             consoleOutputArea.appendText("[ERROR] Reading output for " + currentlySelectedBot.getName() + ": " + e.getMessage() + "\n");
                         });
                     } finally {
-                        // This block runs when the bot process finishes (crashes, stops, etc.)
                         Platform.runLater(() -> {
-                            currentlySelectedBot.setRunning(false);
-                            currentlySelectedBot.setBotProcess(null); // Clear the process reference
-                            consoleOutputArea.appendText("[INFO] " + currentlySelectedBot.getName() + " process finished.\n");
-                            updateUIState(currentlySelectedBot); // Update UI after bot stops
+                            if (currentlySelectedBot != null) { // Check if bot still exists/selected
+                                currentlySelectedBot.setRunning(false);
+                                currentlySelectedBot.setBotProcess(null);
+                                consoleOutputArea.appendText("[INFO] " + currentlySelectedBot.getName() + " process finished.\n");
+                                updateUIState(currentlySelectedBot);
+                            } else {
+                                consoleOutputArea.appendText("[INFO] A bot process finished after the bot was deselected or removed.\n");
+                            }
                         });
                     }
                 }).start();
 
-
                 consoleOutputArea.appendText("[INFO] " + currentlySelectedBot.getName() + " started successfully!\n");
-                statusLabel.setText("Bot started: " + currentlySelectedBot.getName());
+                String formattedStatus = StringFormatter.formatBotStatus(currentlySelectedBot.getName(), currentlySelectedBot.isRunning());
+                statusLabel.setText(formattedStatus);
+                consoleOutputArea.appendText(StringFormatter.getGreeting("Bot Manager User") + "\n");
 
             } catch (IOException e) {
-                showAlert("Error Starting Bot", "Could not start bot: " + e.getMessage());
-                currentlySelectedBot.setRunning(false); // Set status back to stopped on error
-                statusLabel.setText("Failed to start bot: " + currentlySelectedBot.getName());
+                showAlert("Error Starting Bot", "Could not start bot '" + currentlySelectedBot.getName() + "': " + e.getMessage());
+                if (currentlySelectedBot != null) {
+                    currentlySelectedBot.setRunning(false);
+                    statusLabel.setText("Failed to start bot: " + currentlySelectedBot.getName());
+                }
                 e.printStackTrace();
             }
 
@@ -538,7 +578,7 @@ public class MainController implements Initializable {
             if (autoScrollCheckBox.isSelected()) {
                 consoleOutputArea.setScrollTop(Double.MAX_VALUE);
             }
-            updateUIState(currentlySelectedBot); // Update button states (disable Start, enable Stop)
+            updateUIState(currentlySelectedBot);
         } else {
             showWarningAlert("No Bot Selected", "Please select a bot from the list to start.");
         }
@@ -910,6 +950,49 @@ public class MainController implements Initializable {
             e.printStackTrace();
         }
     }
+
+    // In MainController.java
+    @FXML
+    private void handleSendCommand() {
+        if (currentlySelectedBot == null) {
+            showWarningAlert("No Bot Selected", "Please select a bot to send a command to.");
+            return;
+        }
+        if (!currentlySelectedBot.isRunning() || currentlySelectedBot.getBotProcess() == null) {
+            showWarningAlert("Bot Not Running", currentlySelectedBot.getName() + " is not running or its process is unavailable. Start the bot first.");
+            return;
+        }
+
+        String commandText = botCommandInput.getText();
+        if (commandText == null || commandText.trim().isEmpty()) {
+            showWarningAlert("Empty Command", "Please enter a command to send.");
+            return;
+        }
+
+        consoleOutputArea.appendText("[UI_COMMAND] Attempting to send to " + currentlySelectedBot.getName() + ": " + commandText + "\n");
+
+        Process botProcess = currentlySelectedBot.getBotProcess();
+        if (botProcess.isAlive()) {
+            try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(botProcess.getOutputStream()))) {
+                writer.write(commandText + System.lineSeparator()); // Send command with a newline
+                writer.flush();
+                consoleOutputArea.appendText("[SYSTEM] Command '" + commandText + "' sent to " + currentlySelectedBot.getName() + "'s input stream.\n");
+                botCommandInput.clear();
+            } catch (IOException e) {
+                consoleOutputArea.appendText("[ERROR] Failed to send command to " + currentlySelectedBot.getName() + ": " + e.getMessage() + "\n");
+                e.printStackTrace();
+                showErrorAlert("Command Send Error", "Could not send command: " + e.getMessage());
+            }
+        } else {
+            consoleOutputArea.appendText("[WARN] Bot process for " + currentlySelectedBot.getName() + " is not alive.\n");
+            showWarningAlert("Bot Process Error", "The process for " + currentlySelectedBot.getName() + " is no longer running.");
+        }
+
+        if (autoScrollCheckBox.isSelected()) {
+            consoleOutputArea.setScrollTop(Double.MAX_VALUE);
+        }
+    }
+
 
 
     // --- Inner Classes (Data Models) ---
