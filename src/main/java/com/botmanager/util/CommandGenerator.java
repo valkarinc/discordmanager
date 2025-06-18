@@ -1,6 +1,6 @@
 package com.botmanager.util;
 
-import com.botmanager.controller.MainController; // Import the Bot class
+import com.botmanager.controller.MainController;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,13 +14,10 @@ import java.util.List;
  */
 public final class CommandGenerator {
 
-    // Default convention for JAR file location and naming
     private static final String TARGET_SUBDIRECTORY = "target";
-    // Assumes JAR name is like "BotName-1.0-SNAPSHOT.jar"
     private static final String DEFAULT_JAR_FILENAME_PATTERN = "%s-1.0-SNAPSHOT.jar";
 
     private CommandGenerator() {
-        // Private constructor to prevent instantiation
         throw new IllegalStateException("Utility class");
     }
 
