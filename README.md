@@ -103,6 +103,8 @@ Before you begin, ensure you have the following installed:
 * Toggle `View -> Dark Mode` to switch between light and dark themes.
 
 ## 📁 Project Structure
+
+```
 ├── src/
 │   ├── main/
 │   │   ├── java/
@@ -115,12 +117,13 @@ Before you begin, ensure you have the following installed:
 │   │       ├── css/                        # CSS stylesheets (styles.css, dark-mode.css)
 │   │       ├── fxml/                       # FXML UI definitions (main.fxml, NewBotWizard.fxml, etc.)
 │   │       ├── images/                     # Application icons and placeholder images
-│   │       └── bot-config.json (or similar)# Placeholder for future bot configurations
+│   │       └── bot-config.json             # Placeholder for future bot configurations
 │   └── test/
 │       └── java/                           # Unit tests
 ├── pom.xml                                 # Maven project configuration for the manager application
 ├── docs/                                   # Documentation (e.g., screenshots)
 └── README.md                               # This file
+```
 
 ## 🛠️ Technologies Used
 
