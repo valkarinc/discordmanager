@@ -1,0 +1,7 @@
+{
+  "latest_version": "1.0.0",
+  "download_url_windows": "https://github.com/valkarinc/discordmanager/releases/download/v1.0.0/DiscordBotManager-1.0.0-windows.zip",
+  "download_url_linux": "https://github.com/valkarinc/discordmanager/releases/download/v1.0.0/DiscordBotManager-1.0.0-linux.zip",
+  "download_url_macos": "https://github.com/valkarinc/discordmanager/releases/download/v1.0.0/DiscordBotManager-1.0.0-macos.zip",
+  "release_notes": "Minor bug fixes and performance improvements."
+}
