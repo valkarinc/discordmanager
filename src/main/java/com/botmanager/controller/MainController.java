@@ -681,17 +681,14 @@ public class MainController implements Initializable {
 
                     masterBotList.remove(botToRemove); // Remove from your master list
 
-                    // Only clear selection and details if the bot being removed *was* the currently selected one
-                    // This prevents issues if selection changed during alert interaction
                     if (currentlySelectedBot == botToRemove) {
                         currentlySelectedBot = null; // Clear selection in controller state
                         botListView.getSelectionModel().clearSelection(); // Visually clear selection
                         clearBotDetails(); // Clear detail pane
                     }
 
-                    updateUIState(null); // Reset UI to no-bot-selected state, ensuring buttons are correctly disabled
+                    updateUIState(null);
 
-                    // Update running bots count
                     long runningCount = masterBotList.stream().filter(Bot::isRunning).count();
                     runningBotsLabel.setText("Active Bots: " + runningCount);
 
@@ -857,12 +854,7 @@ public class MainController implements Initializable {
             // TODO: Persist the updated bot object to disk (e.g., JSON file)
             masterBotList.set(masterBotList.indexOf(currentlySelectedBot), currentlySelectedBot); // Update in master list to reflect changes in ListView
 
-            // Force ListView to re-render selected item to show updated name, etc.
             botListView.refresh();
-            // Or if names can change:
-            // int selectedIndex = botListView.getSelectionModel().getSelectedIndex();
-            // botListView.getItems().set(selectedIndex, currentlySelectedBot); // This will update the name displayed
-            // botListView.getSelectionModel().select(selectedIndex);
 
             statusLabel.setText("Configuration saved for " + currentlySelectedBot.getName());
             showInfoAlert("Configuration Saved", "Bot configuration for " + currentlySelectedBot.getName() + " has been saved.");
@@ -870,8 +862,6 @@ public class MainController implements Initializable {
             showWarningAlert("No Bot Selected", "Please select a bot to save its configuration.");
         }
     }
-
-    // --- Utility Methods ---
 
     /**
      * Gets the primary stage of the application.
@@ -926,7 +916,7 @@ public class MainController implements Initializable {
     @FXML
     private void handleCreateNewBot(ActionEvent event) {
         try {
-            // Load the FXML for the wizard
+
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/NewBotWizard.fxml"));
             AnchorPane wizardRoot = loader.load(); // NewBotWizard.fxml uses AnchorPane as root
             NewBotWizardController wizardController = loader.getController();
@@ -941,9 +931,6 @@ public class MainController implements Initializable {
             wizardStage.setResizable(false); // Wizards are often fixed size
 
             wizardStage.showAndWait(); // Show dialog and wait for it to be closed
-
-            // The 'Finish' button in NewBotWizardController will call addBotToManager
-            // so no need to process a result here.
 
         } catch (IOException e) {
             showErrorAlert("Error Loading Wizard", "Could not load the bot creation wizard: " + e.getMessage());
@@ -993,10 +980,6 @@ public class MainController implements Initializable {
         }
     }
 
-
-
-    // --- Inner Classes (Data Models) ---
-
     /**
      * Bot Model Class
      * Represents a Discord Bot managed by the application.
@@ -1007,14 +990,13 @@ public class MainController implements Initializable {
         private String description;
         private String projectPath;
         private String version;
-        private String mainFile; // e.g., "com.mybot.MainClass" or "index.js"
+        private String mainFile;
         private String logLevel; // INFO, DEBUG, ERROR etc.
         private boolean isRunning;
         private String jvmArgs; // For Java bots, JVM arguments
         private int startupDelayMs; // Delay before starting bot process
         private Process botProcess;
 
-        // Using ObservableList for env variables so changes are automatically reflected if bound
         private ObservableList<EnvVariable> envVariables = FXCollections.observableArrayList();
 
         public Bot(String id, String name, String description, String projectPath, String version, String mainFile, String logLevel, boolean isRunning) {
@@ -1066,14 +1048,14 @@ public class MainController implements Initializable {
 
         @Override
         public String toString() {
-            return name; // Used by ListView by default if no cell factory
+            return name;
         }
 
-        public Process getBotProcess() { // <--- ADD THIS METHOD HERE
+        public Process getBotProcess() {
             return botProcess;
         }
 
-        public void setBotProcess(Process botProcess) { // <--- ADD THIS METHOD HERE
+        public void setBotProcess(Process botProcess) {
             this.botProcess = botProcess;
         }
     }
@@ -1090,10 +1072,6 @@ public class MainController implements Initializable {
             this.value = value;
         }
 
-        // Getters and Setters
-        // Note: For TableView editing with PropertyValueFactory, these should ideally be JavaFX Properties
-        // e.g., private StringProperty key = new SimpleStringProperty();
-        // But for direct editing with TextFieldTableCell, simple getters/setters are often sufficient.
         public String getKey() { return key; }
         public void setKey(String key) { this.key = key; }
 
