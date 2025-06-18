@@ -21,10 +21,10 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ResourceBundle;
 import java.util.UUID; // To generate unique IDs for bots (placeholder)
 import java.util.function.Predicate;
@@ -136,7 +136,7 @@ public class MainController implements Initializable {
         updateUIState(null); // No bot selected initially
 
         // Add test data for UI verification
-        addTestData();
+        //addTestData();
 
         if (createNewBotMenuItem != null) {
             createNewBotMenuItem.setOnAction(this::handleCreateNewBot);
@@ -342,6 +342,14 @@ public class MainController implements Initializable {
         botDetailsTabPane.getSelectionModel().selectFirst(); // Default to console tab
     }
 
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+    
     /**
      * Adds sample bot data for demonstration purposes.
      */
@@ -448,20 +456,79 @@ public class MainController implements Initializable {
     @FXML
     private void handleStartBot() {
         if (currentlySelectedBot != null) {
+            if (currentlySelectedBot.isRunning()) {
+                showAlert("Bot Already Running", currentlySelectedBot.getName() + " is already running.");
+                return;
+            }
+
             System.out.println("Attempting to start bot: " + currentlySelectedBot.getName());
             consoleOutputArea.appendText("[INFO] Starting " + currentlySelectedBot.getName() + "...\n");
-            // TODO: Implement actual bot startup command execution
-            // Simulate startup success/failure
-            boolean started = Math.random() > 0.3; // Simulate 70% success rate
-            if (started) {
+
+            try {
+                // 1. Determine the path to the bot's executable JAR file.
+                //    Assumes Maven builds to 'target/' and JAR is named 'BotName-1.0-SNAPSHOT.jar'.
+                //    YOU MIGHT NEED TO ADJUST THE JAR NAME IF YOUR BOT'S BUILD IS DIFFERENT.
+                Path botJarPath = Paths.get(currentlySelectedBot.getProjectPath(), "target",
+                        currentlySelectedBot.getName() + "-1.0-SNAPSHOT.jar");
+
+                // Check if the JAR file actually exists
+                if (!botJarPath.toFile().exists()) {
+                    showAlert("JAR Not Found", "Bot JAR file not found at: " + botJarPath +
+                            "\nPlease ensure the bot project is built (e.g., run 'mvn clean install' in its folder).");
+                    currentlySelectedBot.setRunning(false); // Ensure status is not running
+                    botListView.refresh();
+                    updateUIState(currentlySelectedBot);
+                    return;
+                }
+
+                // 2. Create a ProcessBuilder to run the Java command.
+                ProcessBuilder processBuilder = new ProcessBuilder("java", "-jar", botJarPath.toString());
+                // Set the working directory for the bot process to its project folder
+                processBuilder.directory(new File(currentlySelectedBot.getProjectPath()));
+                // Redirect error stream to output stream (optional, but often helpful)
+                processBuilder.redirectErrorStream(true);
+
+                // 3. Start the process.
+                Process process = processBuilder.start();
+
+                // 4. Store the Process object in the Bot object.
+                currentlySelectedBot.setBotProcess(process); // You need to add this method to your Bot class
                 currentlySelectedBot.setRunning(true);
-                startBotButton.setDisable(true);
-                stopBotButton.setDisable(false);
+
+                // 5. Read output from the bot process in a separate thread.
+                //    This prevents the UI from freezing.
+                new Thread(() -> {
+                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            final String outputLine = line; // Need final for lambda
+                            // Update UI on JavaFX Application Thread
+                            Platform.runLater(() -> consoleOutputArea.appendText("[BOT] " + currentlySelectedBot.getName() + ": " + outputLine + "\n"));
+                        }
+                    } catch (IOException e) {
+                        Platform.runLater(() -> {
+                            consoleOutputArea.appendText("[ERROR] Reading output for " + currentlySelectedBot.getName() + ": " + e.getMessage() + "\n");
+                        });
+                    } finally {
+                        // This block runs when the bot process finishes (crashes, stops, etc.)
+                        Platform.runLater(() -> {
+                            currentlySelectedBot.setRunning(false);
+                            currentlySelectedBot.setBotProcess(null); // Clear the process reference
+                            consoleOutputArea.appendText("[INFO] " + currentlySelectedBot.getName() + " process finished.\n");
+                            updateUIState(currentlySelectedBot); // Update UI after bot stops
+                        });
+                    }
+                }).start();
+
+
                 consoleOutputArea.appendText("[INFO] " + currentlySelectedBot.getName() + " started successfully!\n");
                 statusLabel.setText("Bot started: " + currentlySelectedBot.getName());
-            } else {
-                consoleOutputArea.appendText("[ERROR] Failed to start " + currentlySelectedBot.getName() + ".\n");
+
+            } catch (IOException e) {
+                showAlert("Error Starting Bot", "Could not start bot: " + e.getMessage());
+                currentlySelectedBot.setRunning(false); // Set status back to stopped on error
                 statusLabel.setText("Failed to start bot: " + currentlySelectedBot.getName());
+                e.printStackTrace();
             }
 
             // Recalculate running bots
@@ -471,7 +538,7 @@ public class MainController implements Initializable {
             if (autoScrollCheckBox.isSelected()) {
                 consoleOutputArea.setScrollTop(Double.MAX_VALUE);
             }
-            updateUIState(currentlySelectedBot); // Update button states
+            updateUIState(currentlySelectedBot); // Update button states (disable Start, enable Stop)
         } else {
             showWarningAlert("No Bot Selected", "Please select a bot from the list to start.");
         }
@@ -862,6 +929,7 @@ public class MainController implements Initializable {
         private boolean isRunning;
         private String jvmArgs; // For Java bots, JVM arguments
         private int startupDelayMs; // Delay before starting bot process
+        private Process botProcess;
 
         // Using ObservableList for env variables so changes are automatically reflected if bound
         private ObservableList<EnvVariable> envVariables = FXCollections.observableArrayList();
@@ -916,6 +984,14 @@ public class MainController implements Initializable {
         @Override
         public String toString() {
             return name; // Used by ListView by default if no cell factory
+        }
+
+        public Process getBotProcess() { // <--- ADD THIS METHOD HERE
+            return botProcess;
+        }
+
+        public void setBotProcess(Process botProcess) { // <--- ADD THIS METHOD HERE
+            this.botProcess = botProcess;
         }
     }
 
