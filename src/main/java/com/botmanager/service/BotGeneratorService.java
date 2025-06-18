@@ -1,6 +1,6 @@
 package com.botmanager.service;
 
-import com.botmanager.controller.MainController.Bot; // Assuming Bot is an inner class of MainController
+import com.botmanager.controller.MainController.Bot;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -9,11 +9,11 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer; // For progress updates
+import java.util.function.Consumer;
 
 public class BotGeneratorService {
 
-    // For progress reporting
+
     private Consumer<String> logConsumer;
 
     public BotGeneratorService(Consumer<String> logConsumer) {
@@ -24,7 +24,7 @@ public class BotGeneratorService {
         if (logConsumer != null) {
             logConsumer.accept(message);
         }
-        System.out.println(message); // Also log to console for debugging
+        System.out.println(message);
     }
 
     public CompletableFuture<Bot> generateBotProject(
@@ -48,7 +48,7 @@ public class BotGeneratorService {
                 Files.createDirectories(projectDir);
                 logProgress("Created project directory: " + projectDir.toAbsolutePath());
 
-                String mainFile = ""; // Will be set based on template
+                String mainFile = "";
 
                 // 2. Select/Generate Template & Populate Files
                 switch (language.toLowerCase()) {
@@ -66,7 +66,7 @@ public class BotGeneratorService {
                             throw new UnsupportedOperationException("Unsupported Python framework: " + framework);
                         }
                         break;
-                    // Add more languages/frameworks here
+                    // can add more languages/frameworks here
                     default:
                         throw new UnsupportedOperationException("Unsupported language: " + language);
                 }
@@ -96,11 +96,10 @@ public class BotGeneratorService {
     }
 
     private String sanitizeFolderName(String name) {
-        // Basic sanitization for directory names
         return name.replaceAll("[^a-zA-Z0-9.-]", "_").toLowerCase();
     }
 
-    // --- Template Generation Methods (Highly Simplified) ---
+    //template generation
     private String generateJavaJDAProject(Path projectDir, String botName, String botToken) throws IOException, InterruptedException {
         logProgress("Generating Java JDA project...");
         Path pomFile = projectDir.resolve("pom.xml");
@@ -246,7 +245,7 @@ public class BotGeneratorService {
         Files.writeString(srcDir.resolve("BotMain.java"), mainClassContent);
         logProgress("BotMain.java generated.");
 
-        return "com.yourbot.BotMain"; // Return main class for Bot object
+        return "com.yourbot.BotMain";
     }
 
     private String generatePythonDiscordPyProject(Path projectDir, String botName, String botToken) throws IOException, InterruptedException {
@@ -305,22 +304,19 @@ public class BotGeneratorService {
         return "bot.py";
     }
 
-    // --- Build Process Execution ---
     private boolean runBuildProcess(Path projectDir, String language) throws IOException, InterruptedException {
         ProcessBuilder processBuilder;
         switch (language.toLowerCase()) {
             case "java":
-                // Assumes Maven is installed and in PATH
+
                 logProgress("Running Maven build (mvn clean install)...");
                 processBuilder = new ProcessBuilder("mvn", "clean", "install");
                 break;
             case "python":
-                // Assumes pip is installed and in PATH
                 logProgress("Running pip install -r requirements.txt...");
                 processBuilder = new ProcessBuilder("pip", "install", "-r", "requirements.txt");
                 break;
-            case "nodejs": // If you add Node.js support
-                // Assumes npm is installed and in PATH
+            case "nodejs":
                 logProgress("Running npm install...");
                 processBuilder = new ProcessBuilder("npm", "install");
                 break;
@@ -328,12 +324,11 @@ public class BotGeneratorService {
                 throw new UnsupportedOperationException("No build process defined for language: " + language);
         }
 
-        processBuilder.directory(projectDir.toFile()); // Set working directory
-        processBuilder.redirectErrorStream(true); // Combine stdout and stderr
+        processBuilder.directory(projectDir.toFile());
+        processBuilder.redirectErrorStream(true);
 
         Process process = processBuilder.start();
 
-        // Capture and log output in real-time
         try (var reader = new java.io.BufferedReader(new java.io.InputStreamReader(process.getInputStream()))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -343,6 +338,6 @@ public class BotGeneratorService {
 
         int exitCode = process.waitFor();
         logProgress("Build process exited with code: " + exitCode);
-        return exitCode == 0; // Return true if successful
+        return exitCode == 0;
     }
 }
