@@ -14,11 +14,11 @@ import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.cell.TextFieldTableCell; // For editable cells
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane; // Added for rootLayout
+import javafx.scene.layout.BorderPane;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -29,25 +29,21 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.UUID; // To generate unique IDs for bots (placeholder)
-import java.util.function.Predicate;
+import java.util.UUID;
 
 /**
- * Main Controller for the Discord Bot Manager application.
+ * Main Controller for the Discord Bot Manager.
  * Handles all UI interactions and coordinates with backend services.
  *
- * @author Your Name (Upgraded by $10k Dev)
- * @version 1.1.0
+ * @author valkarinc
+ * @version 1.0.1
  */
 public class MainController implements Initializable {
 
-    // --- FXML Injections (matched with main.fxml) ---
-
-    // Root Layout
-    @FXML private BorderPane rootLayout; // Added fx:id="rootLayout" in FXML
+    @FXML private BorderPane rootLayout;
 
     // Menu Items
-    @FXML private MenuBar mainMenuBar; // Added fx:id="mainMenuBar" in FXML
+    @FXML private MenuBar mainMenuBar;
     @FXML private MenuItem importBotMenuItem;
     @FXML private MenuItem exitMenuItem;
     @FXML private MenuItem refreshMenuItem;
@@ -56,13 +52,12 @@ public class MainController implements Initializable {
 
     // Sidebar Components
     @FXML private Button addBotButton;
-    @FXML private TextField botSearchField; // New TextField
-    @FXML private ListView<Bot> botListView; // Changed to ListView<Bot>
+    @FXML private TextField botSearchField;
+    @FXML private ListView<Bot> botListView;
     @FXML private Button startAllButton;
     @FXML private Button stopAllButton;
 
-    // Bot Info & Control Components (Right Panel)
-    @FXML private ImageView botAvatar; // New ImageView
+    @FXML private ImageView botAvatar;
     @FXML private Label botNameLabel;
     @FXML private Label botDescriptionLabel;
     @FXML private Label botPathLabel;
@@ -70,21 +65,19 @@ public class MainController implements Initializable {
     @FXML private MenuItem createNewBotMenuItem;
     @FXML private Button createNewBotButton;
 
-    // Bot Control Buttons (Toolbar)
     @FXML private Button startBotButton;
     @FXML private Button stopBotButton;
     @FXML private Button restartBotButton;
-    @FXML private Button editBotButton;   // New button
-    @FXML private Button removeBotButton; // New button
+    @FXML private Button editBotButton;
+    @FXML private Button removeBotButton;
 
     @FXML private TextField botCommandInput;
     @FXML private Button sendCommandButton;
     @FXML private Separator commandInputSeparator;
 
-
     // Tab Pane
-    @FXML private TabPane botDetailsTabPane; // Renamed from configTabPane
-    @FXML private Tab activityMetricsTab; // New Tab
+    @FXML private TabPane botDetailsTabPane;
+    @FXML private Tab activityMetricsTab;
 
     // Console Output Tab
     @FXML private TextArea consoleOutputArea;
@@ -95,8 +88,8 @@ public class MainController implements Initializable {
     @FXML private TextField configBotNameField;
     @FXML private TextField configBotVersionField;
     @FXML private TextField configMainFileField;
-    @FXML private TextField configProjectPathField; // New TextField
-    @FXML private TextArea configDescriptionArea; // New TextArea
+    @FXML private TextField configProjectPathField;
+    @FXML private TextArea configDescriptionArea;
 
     @FXML private TableView<EnvVariable> envVarsTable;
     @FXML private TableColumn<EnvVariable, String> envKeyColumn;
@@ -105,14 +98,13 @@ public class MainController implements Initializable {
     @FXML private Button removeEnvVarButton;
     @FXML private Button saveConfigButton;
 
-    @FXML private TextField jvmArgsField;    // New TextField
-    @FXML private TextField startupDelayField; // New TextField
+    @FXML private TextField jvmArgsField;
+    @FXML private TextField startupDelayField;
 
-    // Status Bar
+
     @FXML private Label statusLabel;
     @FXML private Label runningBotsLabel;
 
-    // --- Internal State ---
     private Stage primaryStage;
     private ObservableList<Bot> masterBotList = FXCollections.observableArrayList();
     private FilteredList<Bot> filteredBotList;
@@ -120,30 +112,23 @@ public class MainController implements Initializable {
     private NewBotWizardController botWizardController;
     private Stage botWizardStage;
 
-    // --- Initialization ---
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         System.out.println("Initializing Discord Bot Manager UI...");
 
-        // Setup Bot List View
         setupBotListView();
 
-        // Setup Environment Variables Table
         setupEnvVarsTable();
 
-        // Setup Search Functionality
         setupBotSearch();
 
-        // Setup bot list selection listener
         setupBotListListener();
 
-        // Load default bot avatar
         loadDefaultBotAvatar();
 
-        // Initialize UI state (disable detail pane elements)
         updateUIState(null); // No bot selected initially
 
-        // Add test data for UI verification
+        // demo data
         //addTestData();
 
         if (createNewBotMenuItem != null) {
@@ -157,17 +142,14 @@ public class MainController implements Initializable {
         System.out.println("Discord Bot Manager UI initialized.");
     }
 
-    /**
-     * Sets up the ListView for displaying bots.
-     */
     private void setupBotListView() {
-        // Set how bots are displayed in the ListView (e.g., by their name)
+
         botListView.setCellFactory(lv -> new ListCell<Bot>() {
             @Override
             protected void updateItem(Bot bot, boolean empty) {
                 super.updateItem(bot, empty);
                 setText(empty ? null : bot.getName());
-                // You could add graphics here too:
+                // @todo: add graphics here too:
                 // if (bot != null && bot.getIcon() != null) {
                 //     ImageView iconView = new ImageView(new Image(bot.getIcon()));
                 //     iconView.setFitHeight(24);
@@ -179,19 +161,15 @@ public class MainController implements Initializable {
             }
         });
 
-        filteredBotList = new FilteredList<>(masterBotList, p -> true); // Initially show all data
+        filteredBotList = new FilteredList<>(masterBotList, p -> true);
         SortedList<Bot> sortedData = new SortedList<>(filteredBotList);
         botListView.setItems(sortedData);
     }
 
-    /**
-     * Sets up the TableView for environment variables, including making cells editable.
-     */
     private void setupEnvVarsTable() {
         envKeyColumn.setCellValueFactory(new PropertyValueFactory<>("key"));
         envValueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
 
-        // Make columns editable
         envKeyColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         envKeyColumn.setOnEditCommit(event -> {
             EnvVariable var = event.getRowValue();
@@ -204,17 +182,15 @@ public class MainController implements Initializable {
             if (var != null) var.setValue(event.getNewValue());
         });
 
-        envVarsTable.setEditable(true); // Enable editing for the entire table
+        envVarsTable.setEditable(true);
     }
 
-    /**
-     * Sets up the search functionality for the bot list.
-     */
+
     private void setupBotSearch() {
         botSearchField.textProperty().addListener((observable, oldValue, newValue) -> {
             filteredBotList.setPredicate(bot -> {
                 if (newValue == null || newValue.isEmpty()) {
-                    return true; // Display all bots if search field is empty
+                    return true;
                 }
                 String lowerCaseFilter = newValue.toLowerCase();
                 return bot.getName().toLowerCase().contains(lowerCaseFilter) ||
@@ -224,9 +200,6 @@ public class MainController implements Initializable {
         });
     }
 
-    /**
-     * Sets up listener for bot list selection changes.
-     */
     private void setupBotListListener() {
         botListView.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldValue, newValue) -> {
@@ -241,14 +214,12 @@ public class MainController implements Initializable {
         );
     }
 
-    /**
-     * Loads a default bot avatar image.
-     */
+    //default img
     private void loadDefaultBotAvatar() {
-        // Add this null check
+
         if (botAvatar == null) {
             System.err.println("Error: botAvatar ImageView is null during loadDefaultBotAvatar call. Check FXML fx:id and injection.");
-            return; // Exit to prevent NPE
+            return;
         }
 
         try (InputStream iconStream = getClass().getResourceAsStream("/images/bot-icon.png")) {
@@ -263,22 +234,18 @@ public class MainController implements Initializable {
         }
     }
 
-    /**
-     * Load details for the selected bot into the detail pane.
-     */
     private void loadBotDetails(Bot bot) {
         if (bot == null) {
             clearBotDetails();
             return;
         }
 
-        // Update Bot Header
+        //bot header
         botNameLabel.setText(bot.getName());
         botDescriptionLabel.setText(bot.getDescription());
         botPathLabel.setText(bot.getProjectPath());
-        // TODO: Update botAvatar.setImage(new Image(bot.getAvatarUrl())) if you have specific avatars
+        // TODO: Update botAvatar.setImage(new Image(bot.getAvatarUrl()))
 
-        // Update Configuration Fields
         configBotNameField.setText(bot.getName());
         configBotVersionField.setText(bot.getVersion());
         configMainFileField.setText(bot.getMainFile());
@@ -287,25 +254,19 @@ public class MainController implements Initializable {
         jvmArgsField.setText(bot.getJvmArgs());
         startupDelayField.setText(String.valueOf(bot.getStartupDelayMs()));
 
-        // Update Environment Variables Table
         envVarsTable.setItems(FXCollections.observableArrayList(bot.getEnvVariables()));
 
-        // Update console (for demo, just show some log)
         consoleOutputArea.appendText("[INFO] Loaded details for " + bot.getName() + ".\n");
 
         statusLabel.setText("Bot details loaded: " + bot.getName());
     }
 
-    /**
-     * Clears bot details when no bot is selected.
-     */
     private void clearBotDetails() {
         botNameLabel.setText("Select a Bot");
         botDescriptionLabel.setText("No bot selected. Please choose a bot from the left sidebar to view its details and controls.");
         botPathLabel.setText("");
-        loadDefaultBotAvatar(); // Reset avatar
+        loadDefaultBotAvatar();
 
-        // Clear all fields
         configBotNameField.clear();
         configBotVersionField.clear();
         configMainFileField.clear();
@@ -319,18 +280,14 @@ public class MainController implements Initializable {
         statusLabel.setText("No bot selected");
     }
 
-    /**
-     * Updates the UI state (enable/disable controls) based on whether a bot is selected.
-     */
-    // In MainController.java, modify updateUIState:
     private void updateUIState(Bot selectedBot) {
         boolean isBotSelected = (selectedBot != null);
         boolean isBotRunningAndProcessAvailable = isBotSelected && selectedBot.isRunning() && selectedBot.getBotProcess() != null && selectedBot.getBotProcess().isAlive();
 
         // Control Buttons
-        startBotButton.setDisable(!isBotSelected || (selectedBot.isRunning())); // Disable if not selected or already running
-        stopBotButton.setDisable(!isBotRunningAndProcessAvailable); // Disable if not selected or not running
-        restartBotButton.setDisable(!isBotSelected); // Can always attempt restart if selected
+        startBotButton.setDisable(!isBotSelected || (selectedBot.isRunning()));
+        stopBotButton.setDisable(!isBotRunningAndProcessAvailable);
+        restartBotButton.setDisable(!isBotSelected);
         editBotButton.setDisable(!isBotSelected);
         removeBotButton.setDisable(!isBotSelected);
 
@@ -339,7 +296,7 @@ public class MainController implements Initializable {
         configBotNameField.setEditable(enableConfigEditing);
         configBotVersionField.setEditable(enableConfigEditing);
         configMainFileField.setEditable(enableConfigEditing);
-        configProjectPathField.setEditable(false); // Project path should generally not be edited directly after creation/import
+        configProjectPathField.setEditable(false);
         configDescriptionArea.setEditable(enableConfigEditing);
         jvmArgsField.setEditable(enableConfigEditing);
         startupDelayField.setEditable(enableConfigEditing);
@@ -360,16 +317,14 @@ public class MainController implements Initializable {
             commandInputSeparator.setManaged(isBotSelected);
         }
 
-
-        // TabPane
         if (isBotSelected) {
             botDetailsTabPane.setDisable(false);
             if (botDetailsTabPane.getSelectionModel().getSelectedItem() == null) {
-                botDetailsTabPane.getSelectionModel().selectFirst(); // Default to console tab
+                botDetailsTabPane.getSelectionModel().selectFirst();
             }
         } else {
             botDetailsTabPane.setDisable(true);
-            if (commandInputSeparator != null) { // Also hide separator if no bot selected
+            if (commandInputSeparator != null) {
                 commandInputSeparator.setVisible(false);
                 commandInputSeparator.setManaged(false);
             }
@@ -384,12 +339,10 @@ public class MainController implements Initializable {
         alert.setContentText(message);
         alert.showAndWait();
     }
-    
-    /**
-     * Adds sample bot data for demonstration purposes.
-     */
+
+
     private void addTestData() {
-        // Create sample bots
+        //keep this here
         Bot bot1 = new Bot("bot-1", "Sample Bot 1", "This is a basic Discord bot for general use.", "/users/chaz/bots/sample-bot-1", "1.0.0", "com.example.Main", "INFO", false);
         bot1.getEnvVariables().add(new EnvVariable("DISCORD_TOKEN", "YOUR_TOKEN_1"));
         bot1.getEnvVariables().add(new EnvVariable("PREFIX", "!"));
@@ -403,17 +356,14 @@ public class MainController implements Initializable {
 
         masterBotList.addAll(bot1, bot2, bot3);
 
-        // Select the first item to show details on startup
         if (!masterBotList.isEmpty()) {
             botListView.getSelectionModel().selectFirst();
         }
 
-        // Update running bots count
         long runningCount = masterBotList.stream().filter(Bot::isRunning).count();
         runningBotsLabel.setText("Active Bots: " + runningCount);
     }
 
-    // --- Event Handlers ---
 
     @FXML
     private void handleImportBot() {
@@ -437,7 +387,7 @@ public class MainController implements Initializable {
 
             Bot newBot = new Bot(botId, botName, botDescription, botPath, botVersion, mainFile, "INFO", false);
             masterBotList.add(newBot);
-            botListView.getSelectionModel().select(newBot); // Select the newly imported bot
+            botListView.getSelectionModel().select(newBot);
 
             showInfoAlert("Import Successful", "Bot project imported: " + botName);
             statusLabel.setText("Bot imported: " + botName);
@@ -500,7 +450,7 @@ public class MainController implements Initializable {
             consoleOutputArea.appendText("[INFO] Starting " + currentlySelectedBot.getName() + "...\n");
 
             try {
-                // 1. Generate the command using CommandGenerator
+
                 List<String> commandParts = CommandGenerator.generateJavaJarStartCommand(currentlySelectedBot);
 
                 if (commandParts == null) {
@@ -519,19 +469,15 @@ public class MainController implements Initializable {
                     return;
                 }
 
-                // 2. Create a ProcessBuilder with the generated command.
                 ProcessBuilder processBuilder = new ProcessBuilder(commandParts);
                 processBuilder.directory(new File(currentlySelectedBot.getProjectPath()));
                 processBuilder.redirectErrorStream(true);
 
-                // 3. Start the process.
                 Process process = processBuilder.start();
 
-                // 4. Store the Process object in the Bot object.
                 currentlySelectedBot.setBotProcess(process);
                 currentlySelectedBot.setRunning(true);
 
-                // 5. Read output from the bot process in a separate thread.
                 new Thread(() -> {
                     try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                         String line;
@@ -545,7 +491,7 @@ public class MainController implements Initializable {
                         });
                     } finally {
                         Platform.runLater(() -> {
-                            if (currentlySelectedBot != null) { // Check if bot still exists/selected
+                            if (currentlySelectedBot != null) {
                                 currentlySelectedBot.setRunning(false);
                                 currentlySelectedBot.setBotProcess(null);
                                 consoleOutputArea.appendText("[INFO] " + currentlySelectedBot.getName() + " process finished.\n");
@@ -571,7 +517,6 @@ public class MainController implements Initializable {
                 e.printStackTrace();
             }
 
-            // Recalculate running bots
             long runningCount = masterBotList.stream().filter(Bot::isRunning).count();
             runningBotsLabel.setText("Active Bots: " + runningCount);
 
@@ -603,14 +548,13 @@ public class MainController implements Initializable {
                 statusLabel.setText("Failed to stop bot: " + currentlySelectedBot.getName());
             }
 
-            // Recalculate running bots
             long runningCount = masterBotList.stream().filter(Bot::isRunning).count();
             runningBotsLabel.setText("Active Bots: " + runningCount);
 
             if (autoScrollCheckBox.isSelected()) {
                 consoleOutputArea.setScrollTop(Double.MAX_VALUE);
             }
-            updateUIState(currentlySelectedBot); // Update button states
+            updateUIState(currentlySelectedBot); // Update button state
         } else {
             showWarningAlert("No Bot Selected", "Please select a bot from the list to stop.");
         }
@@ -656,13 +600,11 @@ public class MainController implements Initializable {
     @FXML
     private void handleRemoveBot() {
         if (currentlySelectedBot != null) {
-            // Capture the currently selected bot in a final local variable
-            // This ensures its value is preserved even if 'this.currentlySelectedBot' changes later
+
             final Bot botToRemove = currentlySelectedBot;
 
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Confirm Bot Removal");
-            // Use the local variable here
             alert.setHeaderText("Remove " + botToRemove.getName() + "?");
             alert.setContentText("Are you sure you want to remove this bot? This action cannot be undone and will delete its configuration.");
             alert.showAndWait().ifPresent(response -> {
@@ -670,16 +612,14 @@ public class MainController implements Initializable {
                     System.out.println("Removing bot: " + botToRemove.getName()); // Use the local variable here too
                     // TODO: Implement actual deletion logic (delete config files, stop if running)
 
-                    // Ensure the bot is stopped if it's running before removal
                     if (botToRemove.isRunning()) {
-                        // This is where you'd call your backend stop logic for botToRemove
+
                         // For now, simulate:
                         consoleOutputArea.appendText("[INFO] Stopping " + botToRemove.getName() + " before removal...\n");
                         botToRemove.setRunning(false); // Update model
-                        // You might need to wait for it to actually stop
                     }
 
-                    masterBotList.remove(botToRemove); // Remove from your master list
+                    masterBotList.remove(botToRemove);
 
                     if (currentlySelectedBot == botToRemove) {
                         currentlySelectedBot = null; // Clear selection in controller state
@@ -708,7 +648,6 @@ public class MainController implements Initializable {
             AnchorPane wizardPane = loader.load();
             NewBotWizardController wizardController = loader.getController();
 
-            // Pass the MainController instance to the wizard controller
             wizardController.setMainController(this); // Allows wizard to call back to MainController
 
             botWizardStage = new Stage();
@@ -835,7 +774,6 @@ public class MainController implements Initializable {
         if (currentlySelectedBot != null) {
             System.out.println("Saving configuration for: " + currentlySelectedBot.getName());
 
-            // Update bot object from UI fields
             currentlySelectedBot.setName(configBotNameField.getText());
             currentlySelectedBot.setVersion(configBotVersionField.getText());
             currentlySelectedBot.setMainFile(configMainFileField.getText());
@@ -848,8 +786,6 @@ public class MainController implements Initializable {
                 startupDelayField.setText(String.valueOf(currentlySelectedBot.getStartupDelayMs())); // Revert
                 return;
             }
-            // envVarsTable updates the Bot's list directly due to its ObservableList nature
-            // and the `setOnEditCommit` handlers.
 
             // TODO: Persist the updated bot object to disk (e.g., JSON file)
             masterBotList.set(masterBotList.indexOf(currentlySelectedBot), currentlySelectedBot); // Update in master list to reflect changes in ListView
@@ -878,7 +814,7 @@ public class MainController implements Initializable {
     }
 
     public void appendConsoleOutput(String message) {
-        // Run on JavaFX Application Thread
+
         Platform.runLater(() -> {
             consoleOutputArea.appendText(message + "\n");
             if (autoScrollCheckBox.isSelected()) {
@@ -920,17 +856,16 @@ public class MainController implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/NewBotWizard.fxml"));
             AnchorPane wizardRoot = loader.load(); // NewBotWizard.fxml uses AnchorPane as root
             NewBotWizardController wizardController = loader.getController();
-            wizardController.setMainController(this); // Pass reference to MainController
+            wizardController.setMainController(this);
 
-            // Create a new Stage for the wizard window
             Stage wizardStage = new Stage();
             wizardStage.setTitle("Create New Discord Bot Project");
-            wizardStage.initModality(Modality.APPLICATION_MODAL); // Blocks interaction with main window
-            wizardStage.initOwner(getStage()); // Set parent window (MainController's stage)
+            wizardStage.initModality(Modality.APPLICATION_MODAL);
+            wizardStage.initOwner(getStage());
             wizardStage.setScene(new Scene(wizardRoot));
-            wizardStage.setResizable(false); // Wizards are often fixed size
+            wizardStage.setResizable(false);
 
-            wizardStage.showAndWait(); // Show dialog and wait for it to be closed
+            wizardStage.showAndWait();
 
         } catch (IOException e) {
             showErrorAlert("Error Loading Wizard", "Could not load the bot creation wizard: " + e.getMessage());
@@ -938,7 +873,6 @@ public class MainController implements Initializable {
         }
     }
 
-    // In MainController.java
     @FXML
     private void handleSendCommand() {
         if (currentlySelectedBot == null) {
@@ -980,21 +914,17 @@ public class MainController implements Initializable {
         }
     }
 
-    /**
-     * Bot Model Class
-     * Represents a Discord Bot managed by the application.
-     */
     public static class Bot {
-        private String id; // Unique identifier for the bot
+        private String id;
         private String name;
         private String description;
         private String projectPath;
         private String version;
         private String mainFile;
-        private String logLevel; // INFO, DEBUG, ERROR etc.
+        private String logLevel;
         private boolean isRunning;
-        private String jvmArgs; // For Java bots, JVM arguments
-        private int startupDelayMs; // Delay before starting bot process
+        private String jvmArgs;
+        private int startupDelayMs;
         private Process botProcess;
 
         private ObservableList<EnvVariable> envVariables = FXCollections.observableArrayList();
@@ -1060,9 +990,6 @@ public class MainController implements Initializable {
         }
     }
 
-    /**
-     * Environment Variable model class
-     */
     public static class EnvVariable {
         private String key;
         private String value;
