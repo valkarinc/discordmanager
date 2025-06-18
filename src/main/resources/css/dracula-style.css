@@ -1,0 +1,391 @@
+/*
+ * dracula-style.css
+ *
+ * Provides a Dracula theme for the Discord Bot Manager application.
+ * Designed to be loaded and unloaded by the MainController.
+ */
+
+/* Dracula Color Palette
+   Background: #282a36
+   Current Line/Selection: #44475a
+   Foreground: #f8f8f2
+   Comment: #6272a4
+   Cyan: #8be9fd
+   Green: #50fa7b
+   Orange: #ffb86c
+   Pink: #ff79c6
+   Purple: #bd93f9
+   Red: #ff5555
+   Yellow: #f1fa8c
+*/
+
+/* Base Styles */
+.root-pane {
+    -fx-background-color: #282a36; /* Dracula Background */
+}
+
+/* Menu Bar */
+.main-menu-bar {
+    -fx-background-color: #282a36; /* Dracula Background */
+    -fx-border-color: #44475a; /* Dracula Current Line/Selection */
+    -fx-border-width: 0 0 1px 0;
+}
+.main-menu-bar .menu-item {
+    -fx-text-fill: #f8f8f2; /* Dracula Foreground */
+}
+.main-menu-bar .menu-item:hover {
+    -fx-background-color: #44475a; /* Dracula Current Line/Selection */
+}
+.main-menu-bar .context-menu { /* For dropdown menus */
+    -fx-background-color: #282a36; /* Dracula Background */
+    -fx-border-color: #44475a; /* Dracula Current Line/Selection */
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 10, 0, 0, 0);
+}
+
+/* Split Pane */
+.main-split-pane .split-pane-divider {
+    -fx-background-color: #44475a; /* Dracula Current Line/Selection */
+}
+
+/* Sidebar */
+.sidebar-pane {
+    -fx-background-color: #282a36; /* Dracula Background */
+    -fx-border-color: #44475a; /* Dracula Current Line/Selection */
+    -fx-border-width: 0 1px 0 0;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 0);
+}
+
+.sidebar-header {
+    -fx-border-color: #44475a; /* Dracula Current Line/Selection */
+}
+
+.sidebar-title {
+    -fx-text-fill: #f8f8f2; /* Dracula Foreground */
+}
+
+/* Buttons - General (adjust text color for accents) */
+.button {
+    -fx-text-fill: #f8f8f2; /* Dracula Foreground */
+}
+.button:hover {
+    -fx-brightness: 1.2;
+}
+.button:pressed {
+    -fx-brightness: 0.8;
+}
+.button:disabled {
+    -fx-opacity: 0.4;
+    -fx-background-color: #44475a; /* Dracula Current Line/Selection */
+    -fx-text-fill: #6272a4; /* Dracula Comment */
+}
+
+/* Specific Button Styles (colors from styles.css are generally fine on dark) */
+.action-button-primary {
+    -fx-background-color: #bd93f9; /* Dracula Purple */
+}
+.action-button-success {
+    -fx-background-color: #50fa7b; /* Dracula Green */
+}
+.action-button-danger {
+    -fx-background-color: #ff5555; /* Dracula Red */
+}
+.action-button-secondary {
+    -fx-background-color: #6272a4; /* Dracula Comment */
+}
+
+/* Control Buttons (Right Panel) */
+.bot-control-toolbar {
+    -fx-background-color: transparent;
+}
+.control-button-start {
+    -fx-background-color: #50fa7b; /* Dracula Green */
+}
+.control-button-stop {
+    -fx-background-color: #ff5555; /* Dracula Red */
+}
+.control-button-restart {
+    -fx-background-color: #ffb86c; /* Dracula Orange */
+    -fx-text-fill: #282a36; /* Dracula Background for contrast */
+}
+
+/* Text Fields and Text Areas */
+.text-field-style, .text-area-style, .search-field {
+    -fx-background-color: #44475a; /* Dracula Current Line/Selection */
+    -fx-border-color: #6272a4; /* Dracula Comment */
+    -fx-text-fill: #f8f8f2; /* Dracula Foreground */
+    -fx-prompt-text-fill: #6272a4; /* Dracula Comment */
+}
+.text-field-style:focused, .text-area-style:focused, .search-field:focused {
+    -fx-border-color: #bd93f9; /* Dracula Purple */
+    -fx-effect: innershadow(gaussian, rgba(189, 147, 249, 0.4), 5, 0.0, 0, 0); /* Purple shadow */
+}
+.text-field-style-readonly {
+    -fx-background-color: #383a48; /* Slightly lighter shade of Dracula Background */
+    -fx-border-color: #44475a; /* Dracula Current Line/Selection */
+    -fx-text-fill: #f8f8f2; /* Dracula Foreground */
+}
+
+/* CheckBox */
+.checkbox-style {
+    -fx-text-fill: #f8f8f2; /* Dracula Foreground */
+}
+.checkbox-style .box {
+    -fx-background-color: #44475a; /* Dracula Current Line/Selection */
+    -fx-border-color: #6272a4; /* Dracula Comment */
+}
+.checkbox-style .box.focused {
+    -fx-border-color: #bd93f9; /* Dracula Purple */
+}
+.checkbox-style .box.checked {
+    -fx-background-color: #bd93f9; /* Dracula Purple */
+    -fx-border-color: #bd93f9; /* Dracula Purple */
+}
+
+/* List View */
+.bot-list-view {
+    -fx-background-color: #282a36; /* Dracula Background */
+    -fx-border-color: #44475a; /* Dracula Current Line/Selection */
+}
+.bot-list-view .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #f8f8f2; /* Dracula Foreground */
+    -fx-border-color: #44475a; /* Dracula Current Line/Selection */
+}
+.bot-list-view .list-cell:last-child {
+    -fx-border-width: 0;
+}
+.bot-list-view .list-cell:selected {
+    -fx-background-color: #44475a; /* Dracula Current Line/Selection */
+    -fx-text-fill: #f8f8f2; /* Dracula Foreground */
+}
+.bot-list-view .list-cell:hover {
+    -fx-background-color: #383a48; /* Slightly lighter shade of Dracula Background */
+}
+
+/* Detail Pane (Right Side) */
+.detail-pane {
+    -fx-background-color: #282a36; /* Dracula Background */
+}
+
+.bot-header-section {
+    -fx-border-color: #44475a; /* Dracula Current Line/Selection */
+}
+
+.bot-avatar {
+    -fx-border-color: #6272a4; /* Dracula Comment */
+    -fx-background-color: #44475a; /* Ensure avatar background is dark */
+}
+
+.bot-name-large {
+    -fx-text-fill: #f8f8f2; /* Dracula Foreground */
+}
+
+.bot-description-large {
+    -fx-text-fill: #6272a4; /* Dracula Comment */
+}
+
+.bot-path-label {
+    -fx-text-fill: #6272a4; /* Dracula Comment */
+}
+
+.section-separator {
+    -fx-background-color: #44475a; /* Dracula Current Line/Selection */
+}
+
+/* Tab Pane */
+.bot-details-tab-pane .tab {
+    -fx-background-color: #44475a; /* Dracula Current Line/Selection */
+    -fx-text-fill: #f8f8f2; /* Dracula Foreground */
+}
+.bot-details-tab-pane .tab:selected {
+    -fx-background-color: #282a36; /* Dracula Background */
+    -fx-border-color: #44475a; /* Dracula Current Line/Selection */
+    -fx-border-width: 1px 1px 0 1px;
+    -fx-text-fill: #f8f8f2; /* Dracula Foreground */
+}
+.bot-details-tab-pane .tab-content-area {
+    -fx-background-color: #282a36; /* Dracula Background */
+    -fx-border-color: #44475a; /* Dracula Current Line/Selection */
+}
+
+.tab-content-pane {
+    -fx-background-color: #282a36; /* Ensure content pane is dark */
+}
+
+/* Console Output Area - This style is intentionally similar to Dracula's code background */
+.console-output-area {
+    -fx-font-family: "Monospaced";
+    -fx-font-size: 13px;
+    -fx-text-fill: #f8f8f2; /* Dracula Foreground */
+    -fx-background-color: #282a36; /* Dracula Background */
+    -fx-control-inner-background: #282a36; /* Dracula Background */
+    -fx-highlight-fill: #44475a; /* Dracula Current Line/Selection */
+    -fx-highlight-text-fill: #f8f8f2; /* Dracula Foreground */
+    -fx-background-radius: 5px;
+    -fx-border-radius: 5px;
+    -fx-border-color: #44475a; /* Dracula Current Line/Selection */
+}
+.console-output-area .content {
+    -fx-background-color: #282a36; /* Dracula Background */
+}
+.console-output-area .scroll-pane {
+    -fx-background-color: transparent;
+}
+.console-output-area .scroll-bar:vertical .thumb,
+.console-output-area .scroll-bar:horizontal .thumb {
+    -fx-background-color: #bd93f9; /* Dracula Purple */
+    -fx-background-insets: 0;
+    -fx-background-radius: 5px;
+}
+.console-output-area .scroll-bar:vertical .track,
+.console-output-area .scroll-bar:horizontal .track {
+    -fx-background-color: #44475a; /* Dracula Current Line/Selection */
+    -fx-background-insets: 0;
+}
+
+/* Settings Sections (Cards) */
+.settings-section-card {
+    -fx-background-color: #282a36; /* Dracula Background */
+    -fx-border-color: #44475a; /* Dracula Current Line/Selection */
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 8, 0, 0, 2);
+}
+
+.section-heading {
+    -fx-text-fill: #f8f8f2; /* Dracula Foreground */
+    -fx-border-color: #44475a; /* Dracula Current Line/Selection */
+}
+
+.form-label {
+    -fx-text-fill: #f8f8f2; /* Dracula Foreground */
+}
+
+/* Table View */
+.data-table {
+    -fx-background-color: #282a36; /* Dracula Background */
+    -fx-border-color: #44475a; /* Dracula Current Line/Selection */
+}
+.data-table .column-header-background {
+    -fx-background-color: #44475a; /* Dracula Current Line/Selection */
+    -fx-border-color: #6272a4; /* Dracula Comment */
+}
+.data-table .column-header {
+    -fx-text-fill: #f8f8f2; /* Dracula Foreground */
+}
+.data-table .table-row-cell {
+    -fx-background-color: -fx-table-cell-border-color, -fx-background ;
+    -fx-background-insets: 0, 0 0 1 0 ;
+}
+.data-table .table-row-cell:odd {
+    -fx-background-color: #383a48; /* Slightly lighter shade of Dracula Background */
+}
+.data-table .table-row-cell:selected {
+    -fx-background-color: #44475a; /* Dracula Current Line/Selection */
+    -fx-text-fill: #f8f8f2; /* Dracula Foreground */
+}
+.data-table .table-cell {
+    -fx-text-fill: #f8f8f2; /* Dracula Foreground */
+}
+.data-table .placeholder .label {
+    -fx-text-fill: #6272a4; /* Dracula Comment */
+}
+
+/* ScrollPane */
+.scroll-pane-style {
+    -fx-background-color: transparent;
+}
+.scroll-pane-style .viewport {
+    -fx-background-color: transparent; /* VERY IMPORTANT: Ensures ScrollPane content background is dark */
+}
+.scroll-pane-style .scroll-bar:vertical .thumb,
+.scroll-pane-style .scroll-bar:horizontal .thumb {
+    -fx-background-color: #bd93f9; /* Dracula Purple */
+}
+.scroll-pane-style .scroll-bar:vertical .track,
+.scroll-pane-style .scroll-bar:horizontal .track {
+    -fx-background-color: #44475a; /* Dracula Current Line/Selection */
+}
+
+/* Dialog Styles (keeping light for readability in typical dialog use) */
+.dialog-pane {
+    -fx-background-color: #f8f8f2; /* Dracula Foreground for light dialog */
+    -fx-border-color: #6272a4; /* Dracula Comment */
+    -fx-border-width: 1px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+}
+.dialog-pane .header-panel {
+    -fx-background-color: #f1f1f1; /* Slightly darker header */
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 0 0 1px 0;
+}
+.dialog-title {
+    -fx-font-size: 1.8em;
+    -fx-font-weight: bold;
+    -fx-text-fill: #282a36; /* Dracula Background for contrast */
+}
+.dialog-subtitle {
+    -fx-font-size: 1.0em;
+    -fx-text-fill: #6272a4; /* Dracula Comment */
+}
+.dialog-pane .content {
+    -fx-background-color: #f8f8f2; /* Dracula Foreground */
+}
+.dialog-pane .button-bar {
+    -fx-background-color: #f1f1f1;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1px 0 0 0;
+    -fx-padding: 10px 15px;
+}
+
+/* Error Message in Dialog */
+.error-message {
+    -fx-text-fill: #ff5555; /* Dracula Red */
+    -fx-font-size: 0.95em;
+    -fx-font-weight: bold;
+}
+
+/* ComboBox in Dialog */
+.combo-box-style {
+    -fx-background-color: #f8f8f2; /* Dracula Foreground */
+    -fx-border-color: #6272a4; /* Dracula Comment */
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 5px;
+    -fx-font-size: 14px;
+}
+.combo-box-style .list-cell {
+    -fx-text-fill: #282a36; /* Dracula Background for contrast */
+    -fx-background-color: #f8f8f2; /* Dracula Foreground */
+}
+.combo-box-style .list-cell:filled:selected, .combo-box-style .list-cell:filled:selected:hover {
+    -fx-background-color: #bd93f9; /* Dracula Purple */
+    -fx-text-fill: #f8f8f2; /* Dracula Foreground */
+}
+.combo-box-style .list-cell:filled:hover {
+    -fx-background-color: #e9ecef; /* A light grey, similar to original, or could use a very light Dracula accent */
+    -fx-text-fill: #282a36; /* Dracula Background for contrast */
+}
+
+/* Status Bar */
+.status-bar {
+    -fx-background-color: #282a36; /* Dracula Background */
+    -fx-border-color: #44475a; /* Dracula Current Line/Selection */
+    -fx-border-width: 1px 0 0 0;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 0);
+}
+.status-text {
+    -fx-text-fill: #6272a4; /* Dracula Comment */
+}
+.status-text-count {
+    -fx-text-fill: #f8f8f2; /* Dracula Foreground */
+}
+
+/* Placeholder text */
+.placeholder-text {
+    -fx-text-fill: #6272a4; /* Dracula Comment */
+}
+
+/* Labels (General Text) - Ensure readability */
+.label {
+    -fx-text-fill: #f8f8f2; /* Dracula Foreground */
+}

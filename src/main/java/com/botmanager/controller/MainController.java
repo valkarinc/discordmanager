@@ -49,6 +49,7 @@ public class MainController implements Initializable {
     @FXML private MenuItem exitMenuItem;
     @FXML private MenuItem refreshMenuItem;
     @FXML private CheckMenuItem darkModeMenuItem;
+    @FXML private CheckMenuItem draculaMenuItem;
     @FXML private MenuItem aboutMenuItem;
 
     // Sidebar Components
@@ -429,6 +430,25 @@ public class MainController implements Initializable {
         }
         statusLabel.setText("Dark mode: " + (isDarkMode ? "Enabled" : "Disabled"));
     }
+
+    @FXML
+    private void handleToggleDraculaMode() {
+        boolean isDraculaMode = draculaMenuItem.isSelected();
+        System.out.println("Dracula mode: " + (isDraculaMode ? "ON" : "OFF"));
+        if (rootLayout != null) {
+            ObservableList<String> stylesheets = rootLayout.getStylesheets();
+            String draculaCss = getClass().getResource("/css/dracula-style.css").toExternalForm();
+            if (isDraculaMode) {
+                if (!stylesheets.contains(draculaCss)) {
+                    stylesheets.add(draculaCss);
+                }
+            } else {
+                stylesheets.remove(draculaCss);
+            }
+            statusLabel.setText("Dracula mode: " + (isDraculaMode ? "Enabled" : "Disabled"));
+        }
+    }
+
 
     @FXML
     private void handleAbout() {

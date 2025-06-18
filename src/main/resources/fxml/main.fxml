@@ -22,6 +22,7 @@
                     <items>
                         <MenuItem fx:id="refreshMenuItem" mnemonicParsing="false" onAction="#handleRefresh" text="Refresh" />
                         <CheckMenuItem fx:id="darkModeMenuItem" mnemonicParsing="false" onAction="#handleToggleDarkMode" text="Dark Mode" />
+                        <CheckMenuItem fx:id="draculaMenuItem" mnemonicParsing="false" onAction="#handleToggleDraculaMode" text="Dracula Mode" />
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Help">
